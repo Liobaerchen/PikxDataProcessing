@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Understanding LivWell</title>
+    <!-- added: fonts + MathJax. This is AI, I didn't know MathJax and wasn't sure how to format equations -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+
+<style>
+    /* same colour palette as plots :) */
+    :root {
+        --c0: #F8B195; /* orange */
+        --c1: #F67280; /* pink */
+        --c2: #C06C84; /* brighter_purple */
+        --c3: #6C5B7B; /* darker_purple */
+        --c4: #355C7D; /* blue */
+        --text: #2a2a2a;
+        --muted: #888;
+        --border: #e0ddd9;
+        --bg: #faf9f7;
+    }
+
+    body {
+        margin: 0;
+        overflow: auto; /* I want vertical, but not horizontal scrolling */
+        font-family: 'Source Sans 3', sans-serif; /* changed */
+        font-weight: 300;
+        line-height: 1.7;
+        color: var(--text);
+        background: var(--bg);
+        text-align: center;
+    }
+
+    h1 {
+        font-family: 'Lora', serif;
+        font-weight: 600;
+        font-size: 1.8rem;
+        color: var(--c4);
+        margin: 48px 0 8px;
+    }
+
+    h2 {
+        font-family: 'Lora', serif;
+        font-weight: 400;
+        color: var(--text);
+        margin-top: 48px;
+    }
+
+    /* layout fix: image + text side by side */
+    .item {
+    display: none;
+    padding: 0px 100px; /* no top and bottom padding, but left and right */
+    gap: 20px;
+    align-items: flex-start;
+    flex-direction: column;  /* added: stacks h3 above */
+    overflow: visible;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+
+    /* this separation from item allows to have a slide heading */
+    .slide-body {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .active {
+        display: flex;
+    }
+
+    .images {
+    display: flex;
+    gap: 10px;
+    flex-direction: row;
+
+    /* The container gets a stable size and the images will be flexible */
+    width: 40vw;
+    max-height: 80vh;
+    }
+
+    /* This makes it so that, in my gallery, if I add just one img, it
+    shows it full-screen.
+    But if it's two, they get stacked */
+    /* If I have a single image, just make it take up 100% of the container */
+    .images img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        border-radius: 3px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.07); /* pretty */
+    }
+    /* If multiple images, I stack vertically */
+    .images:has(img + img) {
+    flex-direction: column;
+
+    /* and make container bigger when multiple images are used,
+    so that they stay well visible */
+    width: 40vw;
+    height: 50vh;
+    }
+
+    textarea {
+        width: 100%;
+        height: 120px;
+        padding: 10px;
+        box-sizing: border-box;
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        background: #f6f3f0;
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: var(--muted);
+        resize: vertical;
+    }
+
+    .text {
+        text-align: left;
+        max-width: 600px;
+    }
+
+    .livwell_quote {
+        font-style: italic;
+        font-weight: 300;
+        color: var(--c3);
+    }
+
+    /* Formatting for the equations and models: */
+    .model {
+      margin-bottom: 40px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-align: left;
+      max-width: 860px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .equation {
+      font-family: "Times New Roman", serif;
+      font-size: 20px;
+      text-align: center;
+      margin: 15px 0;
+      padding: 14px;
+      background: #f4f2f0;
+      border-radius: 4px;
+      color: var(--c4);
+    }
+
+    /* For the little info-boxes */
+    .box {
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--c3); /* adds a pretty line on top of the box */
+    border-radius: 6px;
+    padding: 15px 20px;
+    background: #faf9f7;
+    margin: 20px auto;
+    max-width: 500px;
+    text-align: left;
+    font-family: sans-serif;
+}
+
+    /* these are section divides */
+    hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 48px 60px;
+    }
+
+    /* For the DV removal explanation */
+    .non-scroll-item {
+    display: flex;
+    padding: 60px;
+    gap: 20px;
+    align-items: flex-start;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+/* for the slideshow */
+#slideshow {
+    position: relative;
+}
+#prev, #next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--c4);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    z-index: 10;
+}
+#prev { left: 1vw; }
+#next { right: 1vw; }
+
+</style>
+
+<body>
+
+<h1>Understanding LivWell</h1>
+
+<p>
+A first overview of the most important variables for my primary LivWell analysis:
+</p>
+<ul style="display: inline-block; text-align: left;">
+  <li>Research question and Dataset overview</li>
+  <li>Variables (DV, heat, rainfall): Plots, descriptives</li>
+  <li>My first idea (Model 1) and issues (data availability)</li>
+  <li>Overview of Data Cleaning (what was excluded?)</li>
+  <li>Model 2 (hopefully works given data availability)</li>
+</ul>
+
+<hr>
+
+<div style="text-align: center; margin-top: 40px;">
+    <p style="font-style: italic; font-size: 20px; font-family: 'Lora', serif; color: var(--c3);">
+        Is extreme heat related to increased violence against women?
+    </p>
+    <p style="font-weight: 300; margin-top: 10px; color: var(--muted);">
+        Stehen Hitzeextreme mit Gewalt gegen Frauen in Zusammenhang?
+    </p>
+</div>
+
+<div class="box">
+    <p><b>Dataset Description:</b></p>
+    <p>The following plots are based on:</p>
+    <ul>
+        <li>736 observations</li>
+        <li>327 regions</li>
+        <li>34 countries</li>
+        <li>2000–2019 time span</li>
+    </ul>
+</div>
+
+<hr>
+
+  <!-- ------------------------------ -->
+  <!-- Variable plots and descriptions -->
+  <!-- ------------------------------ -->
+<h2>Variable Plots and Descriptions</h2>
+
+<div id="slideshow">  <!-- this is used to add the arrows -->
+    <button id="prev" onclick="go(-1)">&#8592;</button>
+    <button id="next" onclick="go(1)">&#8594;</button>
+
+    <!-- DV dist -->
+    <div class="item active">
+        <div class="slide-content">
+            <h3> Domestic Violence </h3>
+            <div class="slide-body">
+                <!-- using the .images container -->
+                <div class="images">
+                    <img src="livwell_plots/plot_0.jpg">
+                    <img src="livwell_plots/plot_6.jpg">
+                </div>
+                <div class="text">
+                    <p>
+                        Domestic Violence, defined as
+                        <span class="livwell_quote">
+                            'Women who experienced physical violence in the past 12 months (%)'.
+                        </span>
+                    </p>
+                    <p>
+                        So, this is a <strong>percentage of surveyed women</strong>.
+
+                        Importantly, heat is coded in SD. So, any interpretation
+                        should be based on responses to <strong>unusual heat</strong>,
+                        not to high temperature in general.
+                    </p>
+                    <h3>Descriptives</h3>
+                    <ul>
+                      <li><b>Count:</b> 736</li>
+                      <li><b>Mean:</b> 16.42%</li>
+                      <li><b>Std. dev.:</b> 10.82</li>
+                      <li><b>Min:</b> 0%</li>
+                      <li><b>25%:</b> 8.46%</li>
+                      <li><b>Median:</b> 13.32%</li>
+                      <li><b>75%:</b> 22.08%</li>
+                      <li><b>Max:</b> 66.91%</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Heat dist -->
+    <div class="item">
+        <div class="slide-content">
+            <h3> Heat </h3>
+            <div class="slide-body">
+                <div class="images">
+                    <img src="livwell_plots/plot_1.jpg">
+                    <img src="livwell_plots/plot_7.jpg">
+                </div>
+                <div class="text">
+                    <p>
+                        Heat, defined as
+                        <span class="livwell_quote">
+                            'Share of months in the past 12 months with a positive temperature anomaly exceeding 2 SD'
+                        </span>
+                    </p>
+                    <p>
+                        So, this is a <strong>percentage of months</strong> across 1 year.
+                    </p>
+                    <h3>Descriptives</h3>
+                    <ul>
+                      <li><b>Mean:</b> 0.058</li>
+                      <li><b>Std. dev.:</b> 0.103</li>
+                      <li><b>Min:</b> 0.000</li>
+                      <li><b>25%:</b> 0.000</li>
+                      <li><b>Median:</b> 0.000</li>
+                      <li><b>75%:</b> 0.083</li>
+                      <li><b>Max:</b> 0.667</li>
+                    </ul>
+                    <textarea placeholder="Notes">
+    The distribution used to calculate the SD is LOCAL! Not global.
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rainfall dist -->
+    <div class="item">
+        <div class="slide-content">
+            <h3> Rainfall </h3>
+            <div class="slide-body">
+                <div class="images">
+                    <img src="livwell_plots/plot_2.jpg">
+                </div>
+                <div class="text">
+                    <p>This is the rainfall variable Leonie recommended to control for. It is defined as
+                    <span class="livwell_quote">Mean deviation from long-run precipitation (12m)</span>.
+                  So this is the <strong>mean deviation</strong> in rainfall for each month, from a long-run average.</p>
+                    <textarea placeholder="Notes">
+    After excluding rows with NAs for DV, the retained data was from
+    relatively wetter regions. The difference in this rain mean deviation
+    between observed - missing was ~ 0.1 -> Remember this for later!
+
+    In short: DV availability is systematically related to rainfall conditions.
+    Is this an issue?
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finally, is there an association? (without the controls etc., just visually) -->
+    <div class="item">
+        <div class="slide-content">
+            <div class="slide-body">
+                <div class="images">
+                    <img src="livwell_plots/plot_3.jpg">
+                </div>
+                <div class="text">
+                    <p>Finally, is there an association (without the controls etc., just visually)?
+                    To check, I plotted heat against DV.</p>
+                    <textarea placeholder="Notes">
+    Note: find out why the SD ticks don't align, and why this looks so discrete.
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+ </div>
+
+<!-- Note: this is AI, I can't write java -->
+<script>
+    let i = 0;
+    let items = document.querySelectorAll(".item");
+
+    function go(dir) {
+        items[i].classList.remove("active");
+        i = (i + dir + items.length) % items.length;
+        items[i].classList.add("active");
+    }
+
+    document.body.onclick = function () {
+        if (event.target.closest("#prev, #next")) return;
+        items[i].classList.remove("active");
+        i = (i + 1) % items.length;
+        items[i].classList.add("active");
+    };
+</script>
+
+<hr>
+
+<!-- ------------------------------ -->
+<!-- Data Cleaning Process and Final Model -->
+<!-- ------------------------------ -->
+<p>
+The model I wanted to go with before looking at the data was:
+</p>
+
+<!-- MODEL 1 -->
+<div class="model">
+  <h2>Model 1</h2>
+
+  <!-- uses MathJax (this is AI assisted!) -->
+  <div class="equation">
+    \( \text{DV}_{rt} = \beta \cdot \text{Heat}_{rt} + \alpha_r + \gamma_t + \varepsilon_{rt} \)
+  </div>
+
+  <ul>
+    <li><span class="label">Main variables:</span> Heat and DV per region and year</li>
+    <li><span class="label">Controls:</span> subtract region fixed effects, (global) year fixed effects</li>
+    <li><span class="label">Interpretation:</span> compares a region to itself over time</li>
+    <li><span class="label">Question:</span> Does a region become more violent in hotter years compared to its baseline?</li>
+    <li><span class="label">Variation used:</span> within-region over time</li>
+  </ul>
+
+  <p>
+  The issue with this was data availability.
+
+  Here, I printed the years available for each country after excluding rows without
+  DV information:
+  </p>
+
+  <pre style="
+    background: #f6f6f6;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: left;
+">
+Country -> years available:
+
+ARM  [2016]
+BEN  [2017]
+BFA  [2010]
+BGD  [2007]
+CIV  [2012]
+CMR  [2004, 2011, 2018]
+COD  [2007, 2013]
+COL  [2000, 2005, 2010, 2015]
+EGY  [2014]
+ETH  [2016]
+GAB  [2012]
+GHA  [2008]
+GTM  [2015]
+HND  [2011]
+HTI  [2000, 2006, 2012, 2016]
+IND  [2006]
+JOR  [2007, 2012, 2017]
+KEN  [2003, 2008]
+KHM  [2000, 2005, 2014]
+LBR  [2007]
+MLI  [2006, 2012, 2018]
+MOZ  [2011]
+MWI  [2004, 2010, 2015]
+NAM  [2013]
+NGA  [2008, 2013, 2018]
+PAK  [2012, 2017]
+PER  [2000, 2004, 2007, 2009, 2010, 2011, 2012]
+PHL  [2008, 2013, 2017]
+RWA  [2010, 2015]
+SEN  [2017, 2018, 2019]
+SLE  [2013, 2019]
+TGO  [2013]
+TJK  [2012, 2017]
+TLS  [2009, 2016]
+TZA  [2010, 2015]
+UGA  [2006, 2011, 2016]
+ZAF  [2016]
+ZMB  [2007, 2013, 2018]
+ZWE  [2005, 2010, 2015]
+</pre>
+
+</div>
+
+<h2>Data Cleaning Details</h2>
+
+<!-- For the DV removal explanation; always visible, no scroll-takeover -->
+<div class="non-scroll-item">
+    <div class="images">
+        <img src="livwell_plots/plot_5.jpg">
+        <img src="livwell_plots/plot_8.jpg">
+    </div>
+
+    <div class="text">
+        <p>Here you can see from which years I retained data, and also
+          from which countries most data was available.
+
+        DV availability was not great. Overall, I excluded five countries completely:
+        BGD (Bangladesh); EGY (Egypt); GAB (Gabon); GHA (Ghana); BEN (Benin).
+        Most because there was no DV data, but also some due to no variation in
+        heat (probably only 1 year and one region was available).
+      </p>
+
+        <textarea placeholder="Notes">
+After excluding rows with NAs for DV, the retained data was from
+relatively wetter regions. The difference in this rain mean deviation
+between observed - missing was ~ 0.1 -> Remember this for later!
+
+In short: DV availability is systematically related to rainfall conditions.
+Is this an issue?
+
+# NOTE to self for later checking: I checked the heat removal using my heat variable.
+# But that is already coded in deviations from local means...
+# so I MAY have removed warmer countries after all... definitely check!
+        </textarea>
+    </div>
+
+    <div class="box">
+        <p><b>Data Cleaning:</b></p>
+        <ul>
+            <li>Started with: 1832 observations</li>
+            <li>Removed: 1074 rows (~~59% of all rows)</li>
+            <li>Removed BGD, EGY, GAB, GHA, BEN out of 39 countries</li>
+            <li>Not great for longitudinal ideas; most countries only have ~2 years available</li>
+        </ul>
+        <p>Basically, DV is <strong> especially sparse </strong></p>
+    </div>
+
+</div>
+
+<hr>
+
+<!-- MODEL 2 -->
+<h2>An Attempt to Account for This:</h2>
+<div class="model">
+  <h2>Model 2</h2>
+
+  <!-- uses MathJax (this is AI assisted!) -->
+  <div class="equation">
+    \( \text{DV}_{rct} = \beta \cdot \text{Heat}_{rct} + \gamma \cdot \text{Rain}_{rct} + \delta_c + \tau_t + \varepsilon_{rct} \)
+  </div>
+
+  <ul>
+    <li><span class="label">Main variables:</span> Heat and DV in region within country and year</li>
+    <li><span class="label">Controls:</span> subtract country (NOT REGION) fixed effects, (global) year fixed effects, and added rainfall control</li>
+    <li><span class="label">Meaning:</span> compares different regions within the same country, within several years</li>
+    <li><span class="label">Question:</span> Are hotter regions within a country more violent, holding rainfall (and year) constant?</li>
+    <li><span class="label">Variation used:</span> within-country spatial variation.
+    The model before was about time, this is using space more!</li>
+  </ul>
+
+  <p>  Essentially, this does not compare e.g. Armenia and Peru, which would get confounded by culture
+      --> Remember Annika's paper!
+
+      BUT it does not throw away so much data because it can just take individual regions in certain years as 'participants'
+      and compare them, after controlling for culture, year, and rain). </p>
+
+  <textarea placeholder="Notes">
+Note: CLUSTER standard errors (consider Leonie's hint: Conley standard error).
+Also a question: The year control will remove climate change effects... is that a problem?
+  </textarea>
+</div>
+
+
+<!-- MODEL 3 - nonparametric -->
+<h2>To check the regional confounds in Model 2</h2>
+<div class="model">
+  <h2>Model 3</h2>
+
+  <p>The more I read about past research about the impacts of heatwaves,
+    the more authors I heard that critcised past studies and pointed out that
+    cross-sectional data is confounded by cultural, regional, infrastructural,
+    etc. differences and basically tells you nothing (e.g. Burke et al., 2015; Nguyen, 2024).
+
+    So, I thought of the following strategy:</p>
+
+    <div class="box" style="border-top-color: var(--c2);">
+      <h2> Nonparametric Verification Strategy </h2>
+
+      <p><b>Idea:</b></p>
+
+      <ul>
+        <li>Run Model 2 as the main analysis: country + year fixed effects, rainfall control,
+            clustered standard errors.</li>
+
+        <li>As a nonparametric verification, run a binomial test:</li>
+      </ul>
+
+      <ol>
+        <li>
+          For each region, check if the hotter year is also the year with more violence
+          <ul>
+            <li>If I have two years, this is just a 1 or 0</li>
+            <li>If I have 3+, check all possible pairs and see if concordant pairs are more
+                common than discordant. If yes, region is a 1. If no, region is a 0.</li>
+            <li>If equal, throw the region away (and report how many were dropped)</li>
+          </ul>
+        </li>
+
+        <li>Count the number of 1s out of the total number of regions</li>
+
+        <li>Locate that in a Bernoulli distribution; that's the test</li>
+      </ol>
+
+      <p>
+        After running the binomial test, check whether the hotter year was also always
+        the later year. If yes, acknowledge this as a limitation,
+        but note that survey years are NOT always the same two years. There are different
+        years available per country.
+      </p>
+
+      <p>
+        Also: Model 2 controls for year effects, which the binomial test cannot,
+        so if both point in the same direction, that is reassuring.
+      </p>
+
+      <p>
+        I would have to throw 142 regions away for this, because they only have
+        a single year. But I'd still have 185 regions and 594 observations.
+      </p>
+    </div>
+
+  <textarea placeholder="Notes">
+Note: This works in COMBINATION with model 2. They account for each other's weaknesses.
+  </textarea>
+</div>
+
+<div class="box" style="border-top-color: var(--c1);">
+  <h2> Questions </h2>
+    <ul>
+        <li>If I do more exploratory questions with this dataset, theoretically,
+        I thought this could be useful to inspire future research.
+      However, if I use frequentist statistics, then the LivWell Dataset shouldn't
+    be used after that, right? Because that would be HARKing at its finest.
+  Should I do something like splitting the dataset and leaving parts of it unused?<br><br>
+
+</li>
+        <li>The year control seems necessary, because it controls for global
+          shocks that aren't heat related (like Covid, economy...).
+        But is it an issue because this also controls for climate change?<br><br>
+
+      </li>
+        <li>I think controlling for country in my new model may be
+        an issue. If I only have variation between regions within countries left,
+      then I need to use that to figure out the impact of heat extremes. However,
+    I think that if a country is hit by a heat extreme, that will affect almost
+  all regions, depending on the size of that country. So, can I actually learn much
+  by comparing regions within countries only? I understand that there is an effect of
+  culture etc. between countries that could definitely confound DV differences,
+  especially since I don't have many years available... what to do?<br><br>
+
+</li>
+        <li>I am not controlling for region, because I wouldn't have variation
+        left for my analysis. I think this may be defensible because regions are more
+      similar than countries in culture etc. But would this be confounded too much
+    by e.g. local wealth, whether they are farmers or city-people...?<br><br></li>
+
+    <li>After reading the paper Annika suggested, I am worried about bad control.
+      I think I am not controlling for mediators (rain, year, or country-heat-baselines
+      shouldn't mediate heat-shock -> SD). But I am a bit worried about having
+      excluded wetter regions. Though I don't think it would be a collider and can't
+      see other big issues with the selection. And, clearly, I select
+      based on DV availability, which the LivWell people wrote is sparse and probably
+      impacted by many factors (are women willing to make time and share such
+      personal information)?
+      What do you think?
+    </li>
+    </ul>
+</div>
+
+<div class="box" style="border-top-color: var(--c1);">
+  <h2> To-Do before Analysis </h2>
+    <ol>
+        <li>If model is good; check assumptions (outliers, it's definitely skewed, etc.)<br><br>
+
+</li>
+        <li>Summarise possible mechanisms<br><br>
+
+      </li>
+        <li>After main analysis, look at empowerment moderation and/or others (pick
+          interesting exploratory questions from my list).<br><br>
+</li>
+  </ol>
+</div>
+
+</body>
+</html>
