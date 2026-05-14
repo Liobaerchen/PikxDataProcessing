@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Understanding LivWell</title>
+    <link rel="stylesheet" href="PIKstyle.css">
+    <!-- added: fonts + MathJax. This is AI, I didn't know MathJax and wasn't sure how to format equations -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+
+
+<body>
+
+<h1>Primary Analysis</h1>
+
+<p>
+Assumption checks and results for Models 2 and 3
+</p>
+<ul style="display: inline-block; text-align: left;">
+  <li>Assumption checks for model 2</li>
+  <li>Results and interpretation for model 2</li>
+  <li>Results for model 3</li>
+  <li>Interpretation of model 3 results</li>
+</ul>
+
+
+<hr>
+
+<div style="text-align: center; margin-top: 40px;">
+    <p style="font-style: italic; font-size: 20px; font-family: 'Lora', serif; color: var(--c3);">
+        Is extreme heat related to increased violence against women?
+    </p>
+    <p style="font-weight: 300; margin-top: 10px; color: var(--muted);">
+        Stehen Hitzeextreme mit Gewalt gegen Frauen in Zusammenhang?
+    </p>
+</div>
+
+<div style="display:flex; gap:20px; max-width:860px; margin:40px auto;">
+
+  <div class="box" style="flex:1;">
+    <h2>Model 2</h2>
+    <div class="equation">DV<sub>rct</sub> = β · Heat<sub>rct</sub> + γ · Rain<sub>rct</sub> + δ<sub>c</sub> + τ<sub>t</sub> + ε<sub>rct</sub></div>
+    <ul>
+      <li><b>FE:</b> Country + year</li>
+      <li><b>Controls:</b> Rainfall, clustered SEs</li>
+      <li><b>Variation:</b> Within-country, across regions</li>
+      <li><b>Question:</b> Are hotter regions within a country more violent?</li>
+    </ul>
+  </div>
+
+  <div class="box" style="flex:1; border-top-color: var(--c2);">
+    <h2>Model 3 — binomial check</h2>
+    <p>For each region, check if the hotter year is also the more violent year:</p>
+    <ul>
+      <li>2 years -> score 1 or 0 directly</li>
+      <li>3+ years -> check all pairs; majority concordant = 1, discordant = 0, ties dropped</li>
+    </ul>
+    <p>Count the 1s across all regions and locate that in a Bernoulli(p = 0.5) distribution. That's the test.</p>
+    <p><b>n:</b> 142 single-year regions excluded; 185 regions and 594 observations retained.</p>
+    <p><b>Note:</b> Model 2 controls for year effects; the binomial test cannot. If both point in the same direction, that is reassuring.</p>
+  </div>
+
+</div>
+
+<hr>
+
+
+  <!-- ------------------------------ -->
+  <!-- Assumption Checks for Model 2 -->
+  <!-- ------------------------------ -->
+<h2>Assumption Checks for Model 2</h2>
+
+<div id="slideshow">  <!-- this is used to add the arrows -->
+    <button id="prev" onclick="go(-1)">&#8592;</button>
+    <button id="next" onclick="go(1)">&#8594;</button>
+
+    <!-- Linearity and Homoscedasticity -->
+    <div class="item active">
+        <div class="slide-content">
+            <h3> Linearity and Heteroscedasticity </h3>
+            <div class="slide-body">
+                <!-- using the .images container -->
+                <div class="images">
+                    <img src="analysis_plots/residualsVsFitted.jpg">
+                    <img src="analysis_plots/heatVsDV.jpg">
+                </div>
+                <div class="text">
+                  <div class="box">
+                    <h3>AIC linear vs. quadratic</h3>
+                    <p>
+                      <ul>
+                        <li>Base model AIC: 4926.893269703587,</li>
+                        <li>Square model AIC: 4927.55049744022</li>
+                      </ul>
+                      The quadratic term doesn't add anything.
+                      This indicates it makes sense to use the linear model! Good.
+                    </p>
+                  </div>
+                  <div class="box">
+                    <h3>Notes</h3>
+                    <h4>Plot 1</h4>
+                    <ul>
+                      <li>No obvious linear relationship is visible, but also no e.g. exponential relationship.</li>
+                      <li>Mean of the residuals is roughly around 0 across the range, so linearity looks okay; there's no obvious curve.</li>
+                      <li>The spread of residuals is wider in the middle.
+                        That funnel-ish shape suggests some heteroscedasticity.</li>
+                      <li><strong>Heteroscedasticity is present,
+                        but I think the clustered SEs make the inference robust to this!</strong></li>
+                    </ul>
+                    <h4>Plot 2</h4>
+                    <ul>
+                      <li>Heat only takes a few distinct values,
+                        which makes sense because it's a share of 12 months,
+                        so it can only be multiples of 1/12.
+                        This is an outcome of the variable construction, not really a problem.
+                        But it means heat is almost ordinal, very crude, which should maybe be mentioned later.</li>
+                      <li>There is no immediately visible linear trend.
+                        This could mean one of several things:
+                        <ul>
+                          <li>There is no linear relationship</li>
+                          <li>The relationship is obscured by the effects that I will control for</li>
+                          <li>The relationship is very weak (probably true)</li>
+                          So, this plot isn't alarming. Linearity could be given.
+                          This result is actually kind of expected; without fixed
+                          effects, I am comparing different countries and different years,
+                          probably obscured by many other variables that I am not controlling for.
+                    </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Normality of Residuals -->
+    <div class="item">
+        <div class="slide-content">
+            <h3> Normality of Residuals </h3>
+            <div class="slide-body">
+                <div class="images">
+                    <img src="analysis_plots/qq.jpg">
+                    <img src="analysis_plots/residualHist.jpg">
+                </div>
+                <div class="text">
+                    <h3>Notes</h3>
+                    <h4>Plot 1</h4>
+                    <ul>
+                      <li>Slightly heavy-tailed; worth reporting later.</li>
+                      <li>Makes sense with right-skewed DV distribution.</li>
+                      <li>With n=736, OLS coefficient estimates are robust to this bc of the CLT.</li>
+                    </ul>
+                    <h4>Plot 2</h4>
+                    <ul>
+                      <li>Residuals look relatively normal. Centered at 0. Good.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multicollinearity -->
+    <div class="item">
+        <div class="slide-content">
+            <h3> Multicollinearity </h3>
+            <div class="slide-body">
+                <div class="box">
+                    <h3>VIF: 1.03</h3>
+                    <p>Chosen threshold to diagnose Multicollinearity: 5 (Kim, 2019).<br>
+                    Thus: Multicollinearity does not seem present! Good.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outliers / Influential Observations -->
+    <div class="item">
+        <div class="slide-content">
+          <h3> Outliers / Influential Observations </h3>
+            <div class="slide-body">
+              <div class="text">
+                  <div class="box">
+                      <h3>Counts</h3>
+                      <ul>
+                          <li><b>Cook's distance > 4/n:</b> 45 observations</li>
+                          <li><b>Standardised residual > 3:</b> 11 observations</li>
+                          <li><b>Total (unique) outliers:</b> 46 observations</li>
+                      </ul>
+                  </div>
+                  <div class="box">
+                      <h3>Which countries?</h3>
+                      <p>Most flagged observations come from a handful of countries with either very high or very low DV rates:</p>
+                      <ul>
+                          <li><b>TZA</b> (Tanzania): 9 obs, high DV (42–57%)</li>
+                          <li><b>TLS</b> (Timor-Leste): 8 obs, very mixed DV (7–65%)</li>
+                          <li><b>KEN</b> (Kenya): 5 obs</li>
+                          <li><b>COD</b> (DR Congo): 3 obs, very high DV (60–67%)</li>
+                          <li><b>MLI, SLE, PAK, LBR, UGA, ZMB</b>: 1–2 obs each</li>
+                      </ul>
+                  </div>
+                  <div class="box">
+                      <h3>Notes</h3>
+                      <p>For Cook's distance, a threshold of 4/n was used to flag
+                        observations as outliers (Hair et al., 1998)</p>
+                      <ul>
+                        <li>Might rerun model later without these 46 observations as a robustness check.</li>
+                        <li>No observations will be removed from the main model without theoretical justification.</li>
+                      </ul>
+                  </div>
+            </div>
+        </div>
+    </div>
+ </div>
+
+ <!-- Skew of DV -->
+    <div class="item">
+        <div class="slide-content">
+            <h3> Skew of DV </h3>
+            <div class="slide-body">
+                <div class="images">
+                    <img src="analysis_plots/dvHist.jpg">
+                </div>
+                <div class="text">
+                    <div class="box">
+                        <h3>Notes</h3>
+                        <ul>
+                            <li>The DV is right-skewed (which is expected for this variable).</li>
+                            <li>However, OLS does not assume the DV itself is normally distributed, only that the residuals are, and that assumption relaxes with large n due to the CLT.</li>
+                            <li>The residuals were already checked and looked okay.</li>
+                            <li>Skew could be an issue if it leads to predictions below 0, which would be nonsensical. But most values are between 5–30%, so out-of-bounds predictions are unlikely.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Note: this is AI, I can't write java -->
+<script>
+    let i = 0;
+    let items = document.querySelectorAll(".item");
+
+    function go(dir) {
+        items[i].classList.remove("active");
+        i = (i + dir + items.length) % items.length;
+        items[i].classList.add("active");
+    }
+
+    document.body.onclick = function () {
+        if (event.target.closest("#prev, #next")) return;
+        items[i].classList.remove("active");
+        i = (i + 1) % items.length;
+        items[i].classList.add("active");
+    };
+</script>
+
+<hr>
+
+<!-- ------------------------------ -->
+<!-- Results: Model Output -->
+<!-- ------------------------------ -->
+<h2>Results: Model 2</h2>
+
+<div class="box">
+  <h3>MODEL:</h3>
+
+  <pre style="
+    background: #f6f6f6;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: left;
+  ">
+    OLS Regression Results
+    ------------------------------------------------------------------------------
+    Dep. Variable: dv   R-squared: 0.649
+    Adj. R-squared: 0.623
+    F-statistic: 321.1
+    Prob (F-statistic): 1.11e-31
+
+    Observations: 736
+    Df Model: 52
+    Covariance Type: cluster
+    ------------------------------------------------------------------------------
+    heat coefficient: 8.2402 (SE: 3.644, p = 0.024)
+    rain coefficient: 0.3593 (p = 0.799)
+  </pre>
+
+  <textarea placeholder="Notes">
+ValueWarning: covariance of constraints does not have full rank.
+The number of constraints is 52, but rank is 17
+
+Have to find out what this means... ask a data scientist or Leonie.
+
+What I understand so far:
+The fixed effects + clustering are overlapping in structure (how?),
+so the software cannot fully separate all variance components,
+which makes the standard error calculations partially unstable.
+
+Important:
+- Coefficient estimates are still fine
+- but p-values / standard errors may be less reliable than they look
+  </textarea>
+</div>
+
+<div style="max-width: 1100px; margin: 0 auto; padding: 0 20px;">
+
+<div style="display:flex; gap:20px; flex-wrap:wrap; align-items:stretch;">
+
+  <div class="box" style="flex:1; min-width:260px;">
+    <h3>Summary</h3>
+    <ul>
+      <li><b>R²:</b> 0.649</li>
+      <li><b>Adj. R²:</b> 0.623</li>
+      <li><b>F-statistic:</b> 321.1</li>
+      <li><b>p (F):</b> 1.11e-31 (this is NOT the important significance)</li>
+    </ul>
+  </div>
+
+  <div class="box" style="flex:2; min-width:300px; border-top-color: var(--c2);">
+    <h3>SIGNIFICANCE INCOMING:</h3>
+
+    <p>
+      Heat coefficient: <b>8.24</b><br>
+      SE: 3.64<br>
+      <strong>p = 0.024</strong>
+    </p>
+
+    <p>
+      Since both are measured in percent, a 1 increase in heat and DV doesn't make sense.
+    </p>
+
+    <p>
+      BUT:<br>
+      A 10 percentage-point increase in extreme-heat-month count
+      is associated with a roughly <b>0.8 percentage-point increase</b>
+      in DV prevalence (controlling for rainfall, country, and year fixed effects etc. etc.).
+    </p>
+
+    <p>
+      This seems small, but it is meaningful.
+    </p>
+  </div>
+
+  <div class="box" style="flex:1.2; min-width:280px;">
+    <h3>Interpretation (population perspective)</h3>
+
+    <p>
+      This seems small, but it is meaningful if you consider<br>
+      Even if the increase in risk for each person is tiny,
+      multiplying that small increase over a large population
+      can produce a huge number of additional cases overall.
+    </p>
+
+    <p>
+      Imagine:
+    </p>
+
+    <ul>
+      <li>1,000,000 women experience DV in these countries</li>
+      <li>0.8% increase -> ~8,000 additional cases</li>
+    </ul>
+
+    <p>
+      The point is explained here:
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2560511/">The Axiom of Rose (Malik, 2006)</a>
+    </p>
+
+    <p><b>NOTE:</b> this would be great to mention and maybe visualise</p>
+  </div>
+
+</div>
+
+</div>
+
+<!-- ------------------------------ -->
+<!-- Model 3: Binomial Check -->
+<!-- ------------------------------ -->
+
+<h2>Results: Model 3</h2>
+
+<div style="max-width: 1100px; margin: 0 auto; padding: 0 20px;">
+
+<div style="display:flex; gap:20px; flex-wrap:wrap; align-items:stretch;">
+
+  <div class="box" style="flex:1; min-width:260px;">
+    <h3>MODEL 3: binomial check</h3>
+
+    <p>
+      For each region, check if the hotter year is also the more violent year:
+    </p>
+
+    <ul>
+      <li>2 years -> score 1 or 0 directly</li>
+      <li>3+ years -> check all pairs; majority concordant = 1, discordant = 0, ties dropped</li>
+    </ul>
+
+    <p>
+      Count the 1s across all regions and locate that in a Bernoulli(p = 0.5) distribution. That's the test.
+    </p>
+
+    <p>
+      <b>n:</b> 142 single-year regions excluded; 185 regions and 594 observations retained.
+    </p>
+  </div>
+
+  <div class="box" style="flex:1.2; min-width:280px; border-top-color: var(--c2);">
+    <h3>RESULTS</h3>
+
+    <p>
+      Regions included: <b>109</b><br>
+      Hotter = more violent: <b>51</b><br>
+      Ties: <b>76</b><br>
+      Single-year regions: <b>142</b><br>
+      One-tailed p-value: <b>0.778</b>
+    </p>
+
+    <p>
+      Basically: 50/50 split.
+    </p>
+
+    <p>
+      BUT:
+    </p>
+
+    <p>
+      This might simply reflect coarse aggregation and low within-region variation.
+    </p>
+  </div>
+
+  <div class="box" style="flex:1.2; min-width:280px;">
+    <h3>Interpretation</h3>
+
+    <p>
+      The result suggests no clear directional pattern at this level of aggregation.
+    </p>
+
+    <p>
+      Possible explanations:
+    </p>
+
+    <ul>
+      <li>Effect only exists at short time scales (not yearly averages)</li>
+      <li>Measurement error in both DV and heat</li>
+      <li>Not enough within-region variation</li>
+      <li>Cross-sectional confounding still dominates in Model 2</li>
+      <li>Omitted variables correlated with heat</li>
+    </ul>
+
+    <textarea placeholder="Notes">
+# NOTE:
+This result is not strong evidence for absence of an effect.
+It may simply reflect low power + coarse aggregation.
+
+Need to check:
+- within-region heat variation
+- sensitivity to filtering high-variation regions
+- whether daily/weekly data would change pattern
+    </textarea>
+  </div>
+
+</div>
+
+</div>
+
+<hr>
+
+</div>
+
+<!-- ------------------------------ -->
+<!-- ALTERNATIVE EXPLANATIONS    -->
+<!-- ------------------------------ -->
+<h2>Alternative Explanations & Assumption Checks (Model 3)</h2>
+
+<div class="box">
+  <h3>Possible Explanations for Null Result</h3>
+
+  <p>
+    may be because of coarseness of measure
+  </p>
+
+  <p>
+    possible explanations:
+  </p>
+
+  <ul>
+    <li><b>No real effect at the time scale I use / aggregation is too coarse</b><br>
+      Heat might only affect violence in the very short term (like during very hot days),
+      or on very long time scales (how to test that?) but my data averages everything over a whole year.
+      And I use the “share of extreme months” over a year. This turns a ratio scale into binary,
+      ... and ignores a lot of data.
+    </li>
+
+    <li><b>Measurement error</b><br>
+      My DV data comes from surveys, and people may not report violence accurately.
+      There are also influences like culture, politics, etc. etc.
+      My heat variable is also smoothed over many months.
+      When both variables are noisy, real effects get blurred and look like zero.
+      And the binomial test is not very powerful at all.
+    </li>
+
+    <li><b>Not enough change within regions</b><br>
+      Within each region, heat does not change that much from year to year.
+      If nothing really changes, the model cannot detect any effect.
+      Maybe average heat differences are just too small.
+      NOTE: try a model that only includes large differences!
+    </li>
+
+    <li><b>Cross-sectional bias in Model 2 (it's actually a 0 effect)</b><br>
+      Hotter regions are often also poorer or more rural.
+      These factors could impact DV.
+      So it may look like heat causes violence, but it’s actually these other differences.
+      Also, different regions may have different norms about gender and violence.
+      These differences don’t change much over time, but they can create strong differences between regions.
+    </li>
+
+    <li><b>Similarly: Omitted variables (again, it may really be a null effect)</b><br>
+      There may be other things affecting violence (like economic stress or conflict)
+      that I did not include in the model. If those are linked to heat, results can be wrong.
+    </li>
+  </ul>
+</div>
+
+<!-- ------------------------------ -->
+<!-- ALTERNATIVE EXPLANATION CHECKS -->
+<!-- ------------------------------ -->
+
+<div style="display:flex; gap:20px; flex-wrap:wrap; align-items:stretch; margin-top:20px;">
+
+  <div class="box" style="flex:1; min-width:280px;">
+    <h3>Mechanism Check 1: Within-Region Heat Variation</h3>
+
+    <p>
+      How much does heat actually vary within each region over time?
+    </p>
+
+    <img src="analysis_plots/withinRegionHeatRange.jpg" style="width:100%; border-radius:8px;">
+
+    <p>
+      If most regions cluster near 0, that supports this alternative explanation (they do).
+    </p>
+  </div>
+
+  <!-- PLOT 2, THRESHOLD TEST -->
+
+  <div class="box" style="flex:1; min-width:280px;">
+    <h3>Mechanism Check 2: Does stronger variation change results?</h3>
+
+    <img src="analysis_plots/heat_difference_binomial_p.jpg" style="width:100%; border-radius:8px;">
+
+    <p>
+      - If p shrinks as threshold rises, null result probably a power-problem (it does!).<br>
+      - If p stays ~0.5 regardless -> the null result is probably robust.<br>
+    </p>
+  </div>
+
+  <!-- POWER ANALYSIS PLOT -->
+
+  <div class="box" style="flex:1; min-width:280px;">
+    <h3>Mechanism Check 3: Power of the Binomial Test</h3>
+
+    <img src="analysis_plots/binomial_sensitivity_analysis.jpg" style="width:100%; border-radius:8px;">
+
+    <p>
+      Power = probability of detecting a true effect.
+      A weak true effect (55%) would probably go undetected with n = 109.
+      So the null result is not strong evidence against an effect.
+      The test just may not be sensitive enough with n = 109.
+    </p>
+  </div>
+
+</div>
+<!-- ------------------------------ -->
+<!-- INTERPRETATION -->
+<!-- ------------------------------ -->
+
+<div class="box">
+  <h3>Interpretation of Model 3</h3>
+
+  <p>
+    THINK ABOUT FINAL CONCLUSION AND ADD HERE! ASK LEONIE!
+  </p>
+</div>
+
+<div class="box">
+  <a href = 'index.html'>Back to Main</a>
+</div>
+
+</body>

@@ -63,7 +63,7 @@ total_rows = len(livwell1['dv'])
 na_rows = len(livwell1['dv'][livwell1['dv'].isna()])
 print(f'total rows: {total_rows}')
 print(f'rows where dv is na: {na_rows}')
-print(f'thus percentage excluded: {na_rows/total_rows}')
+print(f'so, proportion excluded: {na_rows/total_rows}')
 
 # now, how much am I excluding if I exlude ALL NAs for any rows?
 any_missing = livwell1.isna().any(axis=1)
@@ -74,11 +74,13 @@ print(f'thus percentage total excluded: {any_na_rows/total_rows}')
 
 # check what I am excluding:
 year_exclusion = livwell1.groupby("year")["dv"].apply(lambda x: x.isna().mean())
+# . mean is turning the 1s and 0s from isna into a percentage
 print(f'\nHow much am I excluding from which years?:\n {year_exclusion}')
 
 country_exclusion = livwell1.groupby("country")["dv"].apply(lambda x: x.isna().mean())
 print(f'\nHow much am I excluding from which countries?:\n {country_exclusion}')
 
+# .agg lets me compute all four statistics for each column in each group at once
 climate_comparison = livwell1.groupby(any_missing)[["heat", "rain"]].agg(
     ["count", "mean", "std", "median"]
 ).round(3)
@@ -90,6 +92,7 @@ print(climate_comparison)
 # is ≈ +0.1 -> remember this for later!
 # DV availability is systematically related to rainfall conditions
 
+# ~ means NOT. So without the rows where sth is missing:
 clean_livwell1 = livwell1[~any_missing].copy()
 print(clean_livwell1.head())
 
@@ -98,7 +101,7 @@ print('e.g. region 1 Nigeria is different from region 1 Germany')
 print(clean_livwell1.groupby("region")["country"].nunique())
 # TRUE! So make a unique identifier
 clean_livwell1["region_id"] = clean_livwell1["country"].astype(str) + "_" + clean_livwell1["region"].astype(str)
-# use region_id for analyses!
+# NOTE to self: use region_id for analyses!
 
 # describe the final dataset
 print(clean_livwell1.shape) # 758 observations
@@ -123,7 +126,7 @@ countries_more_than_5_years = country_years[country_years > 5]
 print(f'Countries with more than 5 years available:\n{countries_more_than_5_years}\n')
 
 # map of countries to years available
-country_to_years = clean_livwell1.groupby("country")["year"].apply(lambda x: sorted(x.unique()))
+country_to_years = clean_livwell1.groupby("country")["year"].unique()
 print(f'Country -> years available:\n{country_to_years}\n')
 # THIS IS ALSO A PROBLEM
 
@@ -417,3 +420,15 @@ non_parametric_livwell = clean_livwell2[clean_livwell2["region_id"].isin(valid_r
 # check
 print(f"Number of regions in new dataset: {non_parametric_livwell['region_id'].nunique()}")
 print(f"Number of observations in new dataset: {len(non_parametric_livwell)}")
+
+
+
+"""
+Finally, save the cleaned dataset for future analyses!
+"""
+# save it here
+clean_livwell2.to_csv("clean_livwell.csv", index=False)
+# but also in the analysis folder (make sure it exists!)
+clean_livwell2.to_csv("../Step2_Analysis/clean_livwell.csv", index=False)
+# and in the step 3 folder!
+clean_livwell2.to_csv("../Step3_PredictionTool/clean_livwell.csv", index=False)

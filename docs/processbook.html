@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Understanding LivWell</title>
+    <link rel="stylesheet" href="PIKstyle.css">
+    <!-- added: fonts + MathJax. This is AI, I didn't know MathJax and wasn't sure how to format equations -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+
+
+<body>
+
+<h1> Process Book </h1>
+
+<!-- Process Book Entry 1 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 1, 2026</span>
+        <span class="entry-tag">Day 1</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Added the work I did in my holidays, before reading the project instructions,
+            to GitHub.
+          This work included:</p>
+          <ol>
+            <li>Reading the LivWell article and documentation and thinking of a
+            Research Question</li>
+            <li>Reading previous literature to identify gaps, common research strategies,
+            and understanding which questions would make sense</li>
+            <li>Loading the LivWell csv into Python and selecting the variables
+            relevant to my analysis.</li>
+            <li>Understanding the data: How exactly are the variables defined?
+            And which are available?</li>
+            <li>Adjusting my analysis question and model given the available data</li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <p>This stage of the project was riddled with issues, including the following:</p>
+            <ol>
+              <li>Operationalising the variables I thought of previously required
+              more reasoning and theoretical argumentation than I had thought.
+            E.g., to operationalise 'violence towards women', there were variables in
+          the dataset that focused only on violence by a partner, or by anyone.
+        To operationalise heat, I could have chosen average temperature, or heatwaves
+      outside of 1SD, 2SD of local averages, etc... The dataset is large, with many variables, and that
+    made things more interesting, but also required more reasoning.</li>
+              <li>How to operationalise concepts that weren't directly in the dataset?
+              For example, 'empowerment'.</li>
+              <li>I had expected data availability from 40+ countries over 10+ years.
+              However, the specific DV module had only been added to the surveys later on.
+            It was also difficult to get women to share this data, so data was very sparse.</li>
+              <li>Because of the sparse data, the initial panel style analysis I had planned was impossible.</li>
+              <li>Additionally, I had to figure out how to plot country-based data
+              to spot country-specific differences.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <p>Both coding and substantial things:</p>
+            <ol>
+              <li>To operationalise the variables, I learned to deeply understand
+                a dataset by combining the documentation, an understanding of
+                how the data was collected, and my own plots. Before this, I had
+                often focused on either how researchers collected data in the real world,
+                OR on my own plots, and rarely ever have I deeply read descriptions
+                of individual variables. But for LivWell, I had to be able to imagine
+                how the researchers collected the data in all these countries,
+                how this data was gathered into regions, what exactly each datapoint
+                was (percentage, deviation from local vs. global average, etc.),
+                and then combine that with my understanding of the literature
+                and what I wanted to model.
+                Basically, it was the first time I had to use both substantial
+                and statistical understanding in this way.
+                That was fun and rewarding!</li>
+              <li>I had to read about different ways to combine observations from
+                different scales and of different, clustered variables, to create
+                scores that reflect a concept and don't overweigh certain variables
+                -> e.g. those measured on larger scales, or represented using
+                more different measurements. I already knew some of these things,
+                but had to remember this knowledge and add to it.
+                I will probably decide on either PCA or a weighted score.</li>
+              <li>To work around the limited data availability, I had to understand
+                the confounds specific to climate and culture related research across
+                regions. For example, I larned what bad control was.
+                I also needed to refresh my understanding of fixed effects.
+              I learned to write them down as models and imagine what would happen,
+            algebraically, with specific datapoints, to really understand what my models
+          did with the data and what they modelled.
+        </li>
+              <li>Next to that, I learned to think creatively about methods. So far, I have only
+            been confronted with data that was perfectly aligned with the methods I understood
+          - because it had been provided by a university, not by the world. To deal with
+        real-world scarcity and still get answers out of my data, I thought of my own variation
+      of what is basically a binomial test, close to Kendall's tau.</li>
+              <li>To visualise the country-specific data, I also learned geopandas,
+                which is a really cool tool and I hope I will use it a lot in this project.</li>
+                <li>Finally, to handle the references for my literature,
+                  I learned that you can use Zotero to directly create a bibliography
+                  in html, which is perfect for this project. Isn't that amazing?</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+                <li><a href="references.html">This literature</a></li>
+                <li><a href="https://geopandas.org/en/stable/getting_started/introduction.html">A Geopandas Tutorial</a></li>
+                <li><a href="https://www.datacamp.com/tutorial/geopandas-tutorial-geospatial-analysis">And another Geopandas Tutorial</a></li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+
+<!-- Process Book Entry 2 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 2, 2026</span>
+        <span class="entry-tag">Day 2</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Did the assumption checks for model 2, and ran it</p>
+          <ol>
+            <li><strong>Conducted Model 2 Assumption Checks:</strong></li>
+            <li>Looked at old statistics books, remembered what assumptions i needed to check for an FE regression, googled, asked AI. E.g.: Normality of Errors, and homoscedasticity, VIF, Cook’s Distance, and clustered standard errors.</li>
+            <li>Found the best library that included all tests i wanted to do: <strong>Statsmodels</strong>. Read lots of documentation and stackoverflow about it.</li>
+            <li>Conducted the checks and made diagnostic plots: Q-Q plots, Residuals vs. Fitted scatters, Histograms...</li>
+            <li>Analyzed the output to determine if assumptions were met. Made notes when there were issues (like heteroscedasticity) for later reporting.</li>
+            <li>Finally ran the test, wrote down a first interpretation of results, tried to link the coefficients to real-world impacts based on previous knowledge I had.</li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <p>This stage of the project was riddled with issues, including the following:</p>
+            <ol>
+              <li>The library I used had many, but not all features I needed. For example, there was no fixed effects argument in statsmodels. So, I used  manual dummy-variable encoding.</li>
+              <li>Similarly, Conley standard errors seem to be pretty standard in R, but I couldn't find them for Python.</li>
+              <li>Rank deficiency warnings. I did not fully understand these, and decided to ask about them in the tutorial.</li>
+              <li>I got a 'ghost window' that kept opening while I was plotting, with nothing in it. It disappeared when I added plt.close() after every showing.</li>
+              <li>I need variance for the analysis, but this led to the exclusion of zero-variance countries. Maybe, this is an issue with sample selection; systematically removing climatically stable regions.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <p>Both coding and substantial things:</p>
+            <ol>
+              <li>How to use statsmodels: how to do assumption checks and an FE
+                regression in Python</li>
+              <li>Identification is a difficult thing. Because of the limited
+                data availability and the issue of country- and year- confounds,
+                I had to be very careful and remove a lot of variation. There are
+                many comparisons I couldn't make, and it made it impossible to look at
+                what I had actually wanted to look at (differences across many years).
+                Because I couldn't compare different countries to each other.</li>
+                <li>I learned to independently find and use the documentation of
+                  Python packages efficiently, combined with online forums.</li>
+                <li>I've never worked with a dataset with this many variables.
+                  But because there are so many, similar, variables, I feel like
+                  I can really observe the following while I am working:
+                  <strong>Data is far from neutral or "true"</strong>.
+                  I want to look at domestic violence and heat, but it is my choice
+                  what domestic violence indicator I choose, whether I look at regions
+                  or countries, what SD I select as cutoff for my temperatures, etc.
+                  <strong>Operationalisations are also modelling</strong>. I knew this,
+                  but Livwell is really illustrating it in a way that lets me understand
+                  what it means in practice.</li>
+                <li>To remember and apply insights from previous courses in my own work (which is very rewarding :) )</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li>livwell.csv (my main dataset)</li>
+              <li><a href="https://pandas.pydata.org/docs/">https://pandas.pydata.org/docs/</a>Pandas documentation</li>
+              <li>Lots of statsmodels documentation:
+                <ul>
+                  <li><a href="https://www.statsmodels.org/stable/index.html">https://www.statsmodels.org/stable/index.html</a> (statsmodels core documentation for OLS, diagnostics, and regression frameworks)</li>
+                  <li><a href="https://www.statsmodels.org/stable/mixed_linear.html">https://www.statsmodels.org/stable/mixed_linear.html</a> (referenced for understanding model structure and fixed-effects logic)</li>
+                  <li><a href="https://www.statsmodels.org/dev/examples/notebooks/generated/contrasts.html">https://www.statsmodels.org/dev/examples/notebooks/generated/contrasts.html</a> (dummy coding / categorical encoding via C() in regression formulas)</li>
+                  <li><a href="https://www.statsmodels.org/dev/generated/statsmodels.graphics.gofplots.qqplot.html">https://www.statsmodels.org/dev/generated/statsmodels.graphics.gofplots.qqplot.html</a> (Q-Q plot implementation)</li>
+                  <li><a href="https://www.statsmodels.org/dev/generated/statsmodels.stats.outliers_influence.variance_inflation_factor.html">https://www.statsmodels.org/dev/generated/statsmodels.stats.outliers_influence.variance_inflation_factor.html</a> (VIF computation)</li>
+                  <li><a href="https://www.statsmodels.org/stable/generated/statsmodels.stats.outliers_influence.OLSInfluence.html">https://www.statsmodels.org/stable/generated/statsmodels.stats.outliers_influence.OLSInfluence.html</a> (Cook’s distance and influence diagnostics)</li>
+                  <li><a href="https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.OLSResults.resid.html">https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.OLSResults.resid.html</a> (residual extraction and interpretation)</li>
+              </ul></li>
+              <li>Bertrand et al. 2004, cited in Burke, Hsiang, and Miguel (2015), to reason about issues with my model.</li>
+              <li><a href = " https://stackoverflow.com/questions/54349525/clustered-standard-errors-in-statsmodels-with-categorical-variables-python">Stackoverflow, to implement their advice and cluster errors</a></li>
+              <li><a href = "https://pmc.ncbi.nlm.nih.gov/articles/PMC2560511/"> Small effects matter when they apply to large populations</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+
+<!-- Process Book Entry 3 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 3, 2026</span>
+        <span class="entry-tag">Day 3</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Coded the binary test</p>
+          <ol>
+            <li>Wrote down step-by-step what it required</li>
+            <li>Implemented it. This was less about using new packages, and more
+            about understanding the structure of the test and coding it based on
+          what I already knew. Less reading, more puzzling. Fun!</li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <p>The coding wasn't easy, but problems were solved by just thinking
+            and trying a bit. However, the <strong>results opposed my expectations!</strong>
+          I had to find a way to interpret this: I now had a model that aligned with
+        previous literature, but also one that didn't. I had to find explanations
+      and adaptations without p-hacking or confabulating too much.</p>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <p>Above all: thinking of and <strong>implementing my own method.</strong>
+            <ul><li>Statistical inference is not tied to standard tests! I can adapt, make my own...</li>
+            <li>To translate ordinal into binary data</li></ul></p>
+            <ol>
+              <li>But also: that I should think about assumptions and power of my
+              own methods before getting too excited and running them immediately,
+            because then I run into the problem of p-hacking and the temptation of justifying results
+          based on my biases.</li>
+          <li>Non-parametric does not mean assumption free.</li>
+              <li>I learned how very sensitive results are to design choices.</li>
+                <li>Real world data is messy and requires deep understanding and some creativity.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li>math.comb</li>
+              <li>binomial formula</li>
+              <li>my memory of various non-parametrics and how sampling dists work</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+
+<!-- Process Book Entry 4 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 4, 2026</span>
+        <span class="entry-tag">Day 4</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Working out the discrepancy between my binary test and the FE model.</p>
+          <ol>
+            <li>Wrote down the different explanations for the results I could think of</li>
+            <li>Thought about which of these are testable</li>
+            <li>Implemented those tests I thought were possible</li>
+            <li>Noted down first interpretations and conclusions</li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <p>The biggest issue was the danger of essentially <strong>p-hacking or
+              justifying a null-result in accordance with my biases</strong>, after my results
+              didn't match each other, or previous literature.
+            But I still needed to interpret my results and think about assumptions.
+          This was especially problematic because I had failed to think about my
+        assumptions and the power of the test BEFORE testing.</p>
+        <ol>
+          <li>Breaking ratio data down into binary data loses a LOT of variation.
+          With an effect size that is known to be small based on previous literature,
+        this needs a LOT of observations to make up for the loss of power. I should
+      have considered that.</li>
+      <li>If the binary and FE test had aligned, they would have compensated for
+        each other's weaknesses. But they didn't.</li>
+        </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <p>Above all: to check my assumptions and power <strong>before</strong> doing my tests.</p>
+            <ol>
+              <li>Also: to carefully think of explanations while being aware of the dangers of post-hoc justifications</li>
+          <li>P-hacking is a real risk, even if unintended</li>
+              <li>Aggregation can destroy real effects, the scale at which you analyse really matters</li>
+                <li>Even in large, impressive datasets, most of the data can be useless for the question at hand</li>
+                <li>Turning hypotheses / potential explanations into code</li>
+                <li>Coding a power analysis in python</li>
+                <li>scipy.stats.binom</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li><a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binom.html">SciPy stats documentation</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+
+<!-- Process Book Entry 5 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 5, 2026</span>
+        <span class="entry-tag">Day 5</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Presenting the analysis and results as html.</p>
+          <ol>
+            <li>lorem ipsum</li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <p>The biggest issue was the danger of essentially <strong>p-hacking or
+              justifying a null-result in accordance with my biases</strong>, after my results
+              didn't match each other, or previous literature.
+            But I still needed to interpret my results and think about assumptions.
+          This was especially problematic because I had failed to think about my
+        assumptions and the power of the test BEFORE testing.</p>
+        <ol>
+          <li>Breaking ratio data down into binary data loses a LOT of variation.
+          With an effect size that is known to be small based on previous literature,
+        this needs a LOT of observations to make up for the loss of power. I should
+      have considered that.</li>
+      <li>If the binary and FE test had aligned, they would have compensated for
+        each other's weaknesses. But they didn't.</li>
+        </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <p>Documenting my process was quite smooth and easy because I had
+            taken many notes while working. This way, I had my thoughts from the
+          analysis right there and could focus on bringing them in order, on documentation. So, I learn:
+        <strong>Noting down my thoughts while working is very helpful!</strong></p>
+            <ol>
+              <li>Apart from that, I recycled my html from 'presenting livwell'.
+              Because I had put effort into making a nice design at the start,
+            I could now use these elements and it was very easy - without thinking about design anymore.
+          Thus: making a nice design right at the start is very helpful. I didn't
+        have to make adjustments or think about it much afterwards. Implementing the design
+      AFTER having made all html pages, on the other hand, would have been a hassle.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6900425/">Kim, J. H. (2019). Multicollinearity and misleading statistical results. Korean Journal of Anesthesiology, 72(6), 558–569. https://doi.org/10.4097/kja.19087</a></li>
+              <li>Hair, J., Anderson, R., Tatham, R., &amp; Black, W. (1998). <i>Multivariate data analysis</i> (5th ed.). Prentice-Hall.</li>
+              <li>Malik, P. (2006). The axiom of Rose. <i>Canadian Journal of Cardiology</i>, <i>22</i>(9), 735.
+              <a href="https://doi.org/10.1016/s0828-282x(06)70297-5">
+                https://doi.org/10.1016/s0828-282x(06)70297-5
+              </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+
+<!-- Process Book Entry 6 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 6, 2026</span>
+        <span class="entry-tag">Day 6</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>I checked Data Availability in the Dataset and thought about
+            whether I should use an additional, other dataset.</p>
+          <ol>
+            <li>Because I had run into issues with identification and modelling
+            DV based on LivWell alone, I checked:<br>
+            <ul>
+              <li>Again how much DV data there really was; also how many observations
+                per country, not only years per country.</li>
+              <li>Which variables had the best temporal coverage.</li>
+              <li>Thought about which possible confounds there were in my region model,</li>
+              <li>and how they could be modelled with LivWell.</li>
+            </ul></li>
+            <li>I also tried to get the html running via GitHub.</li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <ol>
+              <li>Even if it is quite doable to get information about the variables,
+              it is hard to put it into a comprehensive format, because there are
+            around 250 columns...</li>
+            <li>Also, because student's aren't given access to the settings in the
+            GitHub classroom environment, I wasn't able to get the website to work.
+          I will find a way tomorrow.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <p>Both coding and substantial things:</p>
+            <ol>
+              <li>Gaining an understanding of the structure of large amounts of data:<br>
+              by categorising and plotting</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li>I have to admit, I folded and used AI to make my plots...
+              I just did not know how to make such a nice box-plot. But I inspected
+            the code and learned from it!</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+
+<!-- Process Book Entry 7 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 7, 2026</span>
+        <span class="entry-tag">Day 7</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Mainly, I worked on presenting yesterday's results in html.</p>
+          <ol>
+            <li>Thought about which possible confounds there were in my region model,</li>
+            <li>and how they could be modelled with LivWell.</li>
+            <li>I also tried to get the html running via GitHub.</li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <ol>
+              <li>Had to copy my html in my own repository to make it run as
+              a website, because of the lack of permissions. But that worked!</li>
+              <li>Many of the relationships I wanted to show in my
+                causal diagram seemed more plausible as moderators
+                than independent causes. Mermaid didn't seem to have a dedicated
+              syntax for that.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <ol>
+              <li>How nice stacked boxplots are to visualise several distributions
+              at once, intuitively and clearly.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li>
+              <a href="https://seaborn.pydata.org/generated/seaborn.boxplot.html">
+              Boxplot Documentation</a></li>
+              <li>I discovered <a href="https://mermaid.ai/open-source/intro/getting-started.html">
+                Mermaid<a> for plotting a causal path diagram and it is absolutely amazing!
+                  So easy to use and it looks great!</li>
+              <li>Also a very helpful <a href="https://mermaid.js.org/intro/syntax-reference.html">
+                Mermaid tutorial</a> here. I love this tool! And it's quite easy.
+                  Maybe you could recommend it in the course?</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+<!-- Process Book Entry 8 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 8, 2026</span>
+        <span class="entry-tag">Day 8</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Tried to find a workaround for the moderation/mediation
+              visualisation in Mermaid.</p>
+          <ol>
+            <li></li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <ol>
+              <li>Mermaid does not provide moderation syntax (which seems strange... why?)</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <ol>
+              <li>Finding my own workarounds when a library doesn't provide what
+              I want. Showing a moderation with mermaid ended up being quite easy!
+            I just added a mediating element and labelled it as moderation.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li>This <a href="https://mermaid.js.org/intro/syntax-reference.html">
+                Mermaid tutorial</a></li>
+              <li>This <a href="https://mermaid.ai/open-source/syntax/flowchart.html">
+                  site about Mermaid syntax</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+
+<!-- Process Book Entry 9 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 10, 2026</span>
+        <span class="entry-tag">Day 10</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Went over my code again, to remember everything well, understand
+              my models etc., in preparation for the proof of concept.</p>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <ol>
+              <li>None</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <ol>
+              <li>My comments helped me a lot with this. I would have been lost
+              without them. So, I learned the importance of detailed comments (again).</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li>Just my code</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+<!-- Process Book Entry 10 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 12, 2026</span>
+        <span class="entry-tag">Day 12</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Explained my project for proof of concept, made the data-loading
+              more efficient (after advice from Simon), and started thinking
+              about visualisation.</p>
+          <ol>
+            <li></li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <ol>
+              <li>I noticed while presenting that my data loading was very inefficient.
+              I basically did the same cleaning pipeline twice.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <ol>
+              <li>I fixed my data loading in step 2 by making a csv with the cleaned
+                data that I could reuse. So, I learned more efficient data handling!</li>
+              <li>I told Simon how I wanted to visualise my project and he told
+              me about a library that was almost too perfect for it: I want to
+            program in Python, but ideally I need javascript/html for my website.
+          Further, I want it to be interactive and use maps. This library (bokeh)
+        can do all that,, amazing! So, I learned that asking for advice is a very
+      very good idea.</li>
+              <li>Since I did most of my work in the holiday, I am very much on schedule.
+              This allows me to read a lot and spend quite some time on brainstorming
+            for the final stretch of the project - which is nice! So;
+          working on or even ahead of schedule is nice. It takes away the stress
+        and allows to brainstorm, focus on what I think would make the project nice,
+      and enjoy the process :)</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li>This <a href="https://docs.bokeh.org/en/2.4.3/docs/user_guide/geo.html">
+                geo bokeh overview</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+<!-- Process Book Entry 11 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 13, 2026</span>
+        <span class="entry-tag">Day 13</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Making a prediction-visualisation tool based on my analysis results.</p>
+          <ol>
+            <li>Finding a dataset to make predictions for future heatwaves</li>
+            <li></li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <ol>
+              <li>I had a model to predict increase in DV from increase in Heatwaves,
+              but I had no prediction for increase in Heatwaves! A good
+            opportunity to implement several data sources, heheh.</li>
+            <li>The datasets from the IPCC I used were in a format I had
+              never seen: ".nc"</li>
+            <li>The data was relying on a measure of climate change I had
+              never seen and didn't understand at first: radioactive forcing</li>
+            <li>The dataset was also HUGE and took long to work with; so i
+              saved only the results I needed as a csv.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <ol>
+              <li>What radioactive forcing is</li>
+              <li>How to read .nc using xarrays</li>
+              <li>To save my results and start a new script with my output,
+                to save computing and minutes waiting for that computing to finish</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li>The <a href="https://digital.csic.es/bitstream/10261/332744/110/README.txt">
+                IPCC-WGI AR6 Interactive Atlas Dataset</a></li>
+              <li>and here the <a href="https://ipcc-browser.ipcc-data.org/browser/dataset/6171">
+                documentation for the dataset</a></li>
+              <li>This <a href="https://www.icare.univ-lille.fr/reading-a-netcdf-file-with-python-matlab-and-r/">
+                tutorial on how to read .nc data</a></li>
+              <li>And <a href="https://xarray.dev/xarray">xarrat</a>,
+                because it can read .nc.</li>
+              <li> And this <a href="https://www.ipcc.ch/report/ar6/wg2/downloads/outreach/IPCC_AR6_WGII_IntroductionWGII.pdf">
+                explanation of what ssp is.</a></li>
+              <li>The python <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html">,
+                resample</a>, to get something from months to years.</li>
+              <li>The world bank's <a href="https://data.worldbank.org/indicator/SP.POP.TOTL">
+                Info about world population.</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+<!-- Process Book Entry 11 -->
+<div class="process-entry">
+    <div class="entry-header">
+        <span class="entry-date">May 14, 2026</span>
+        <span class="entry-tag">Day 14</span>
+    </div>
+
+    <div class="entry-content">
+        <div class="entry-section">
+            <h4>What I worked on</h4>
+            <p>Presenting my model as a simple simulatio with bokeh.</p>
+          <ol>
+            <li>Finding a dataset to make predictions for future heatwaves</li>
+            <li>Understanding bokeh</li>
+            <li>Implementing the visualisation</li>
+          </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Problems encountered</h4>
+            <ol>
+              <li>Loading the map just didn't work... Until I found a whole article
+              that explained it.</li>
+              <li> For Bokeh, there is no one simple walkthrough, but only lots of
+                documentation on different very specific and customisable functions.
+                Understanding a new library can be very daunting; it's just so much.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>What I learned</h4>
+            <ol>
+              <li>To visualise maps with bokeh.</li>
+              <li>Also to do some reading beyond
+              StackOverflow when things really aren't working</li>
+              <li>To work with a new library - a mix of stackoverflow, documentation,
+                and asking AI about the mistakes in my code was very helpful.</li>
+              <li>Finally, to give up on perfectionism when it really does not seem
+                feasible. For example, my calculation of DV numbers is very approximate,
+                and the baseline is a mix of 2015 temperatures and 2024 populations...
+                But since it is just a visualisation, I think that is acceptable.</li>
+            </ol>
+        </div>
+
+        <div class="entry-section">
+            <h4>Resources used</h4>
+            <ul class="resource-list">
+              <li>This <a href="https://medium.com/data-science/creating-an-interactive-map-in-python-using-bokeh-and-pandas-f84414536a06">
+                Article on how to visualise maps with Bokeh</a></li>
+              <li>This <a href="https://docs.bokeh.org/en/latest/docs/user_guide/topics/geo.html">
+                  Documentation for bokeh maps</a></li>
+              <li>This <a href="https://stackoverflow.com/questions/57178783/how-to-plot-latitude-and-longitude-in-bokeh">
+                  Discussion of how to turn latitudes and longitudes into bokeh coordinates</a></li>
+              <li>This <a href="https://epsg.io/3857">
+                coordinate system that bokeh uses</a></li>
+              <li>This <a href="https://docs.bokeh.org/en/2.3.3/docs/user_guide/data.html">
+                Tutorial for a certain bokeh data type</a></li>
+              <li>This <a href="https://docs.bokeh.org/en/latest/docs/reference/models/mappers.html">
+                tutorial on making things nice and colourful in bokeh</a></li>
+              <li>Documentation on <a href="https://docs.bokeh.org/en/latest/docs/reference/transform.html">
+                bokeh transform</a>, which lets you dynamically adjust the
+              looks of your plot based on computations you do -- SO COOL</li>
+              <li>This <a href="https://docs.bokeh.org/en/3.2.0/docs/examples/basic/annotations/label.html">
+              Bokeh Label tutorial</a></li>
+              <li>Stackoverflow on <a href="https://discourse.bokeh.org/t/live-plot-with-interactivity/10890/6">
+              making plots interactive in Bokeh</a></li>
+              <li>And official documentation on <a href="https://docs.bokeh.org/en/3.0.0/docs/user_guide/interaction/python_callbacks.html">
+              making plots interactive</a></li>
+              <li>And finally, <a href="https://docs.bokeh.org/en/latest/docs/reference/layouts.html">
+              bokeh layout documentation</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/List_of_countries_by_average_yearly_temperature">
+              Country Average Temperatures</a> for the colour mapping</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- End Entry -->
+
+<div class="box">
+  <a href = 'index.html'>Back to Main</a>
+</div>
+
+</body>
+</html>

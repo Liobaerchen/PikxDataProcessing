@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Understanding LivWell</title>
+    <link rel="stylesheet" href="PIKstyle.css">
+    <!-- added: fonts + MathJax. This is AI, I didn't know MathJax and wasn't sure how to format equations -->
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+
+
+<body>
+
+  <!-- Mermaid.js -->
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      themeVariables: {
+        primaryColor: "#F8B195",
+        primaryTextColor: "#2a2a2a",
+        primaryBorderColor: "#6C5B7B",
+        lineColor: "#355C7D",
+        secondaryColor: "#F67280",
+        tertiaryColor: "#C06C84",
+        background: "#faf9f7",
+        fontFamily: "Source Sans 3"
+      }
+    });
+  </script>
+
+<h1>Causal Pathways from Heat to DV</h1>
+  <section class="process-entry">
+
+    <div class="entry-header">
+      <span class="entry-date">Brainstorming Confounds and Controls</span>
+      <span class="entry-tag">Model 2 Confound Brainstorm</span>
+    </div>
+
+    <div class="entry-content">
+
+      <div class="entry-section">
+
+        <!-- Style it so that only the pathways I actually want are purple -->
+        <!-- and the ones I already control are green -->
+        <div class="mermaid">
+          flowchart LR
+            A(Region-Level Heat) --> M(Heat-related stress / vulnerability pathways)
+            M --> B(Domestic Violence)
+
+            %% already controlled
+            C(Culture - controlled via country) --> B
+            C --> M
+            D(Global Shocks - controlled via time) --> B
+            D --> M
+            E(Country-level climate/weather - controlled via country) -.-> A
+            A -.-> E
+
+            %% likely mediators / mechanisms
+            A --> I(heatwaves can hit agricultural regions harder - dying crops)
+            I --> M
+
+            A --> F(shocks specific to a region - extreme rainfall, floods, disasters... Nguyen)
+            F --> M
+
+            A --> R(Regional Water availability - evidenced pathway)
+            R --> M
+
+            A --> M2(Alcohol consumption / use)
+            M2 --> M
+
+            %% likely moderators / contextual vulnerability / maybe both moderator and cause
+            G(urban heat island effect can make cities hotter than the countryside) --> M
+            H(differing access to air conditioning) --> M
+            N(overall regional housing quality) --> M
+            O(Household size / living with many generations) --> M
+            O --> B
+            Q(Shelter / NGO presence) --> M
+            Q --> B
+
+            %% likely BOTH moderator + independent cause
+            J(local culture - local gender norms) --> M
+            J --> B
+
+            K(local police - Do they help women? Reliably?) --> M
+            K --> B
+
+            P(Local education levels) --> M
+            P --> B
+
+            S(Stressfulness of environment - noise pollution, business) --> M
+            S --> B
+
+            %% alcohol norms independent pathway
+            M3(Alcohol norms may differ regionally) --> M2
+            M3 --> B
+
+            %% Main Pathway
+            style A fill:#E8C7D1,color:#2a2a2a,stroke:#C06C84,stroke-width:2px
+            style B fill:#E8C7D1,color:#2a2a2a,stroke:#C06C84,stroke-width:2px
+
+            %% Style for controlled confounds
+            style C fill:#DCE8D5,color:#2a2a2a,stroke:#7A9B76,stroke-width:2px
+            style D fill:#DCE8D5,color:#2a2a2a,stroke:#7A9B76,stroke-width:2px
+            style E fill:#DCE8D5,color:#2a2a2a,stroke:#7A9B76,stroke-width:2px
+        </div>
+
+        <p> NOTE: LivWell was aggregated at regional level, so I think most or
+          all of these are actually available at regional level! <br>
+        <br>
+      Note 2: With Leonie, think about which actually make sense to control!
+      Rank them and add a cut
+    after which I believe it should NOT be controlled.
+  <strong>Also think about BAD control!</strong>
+  Many of these plausibly impact pathways that are already in
+  the literature. Controlling for them would be bad control... right? Because it isn't actually
+  regional heat that causes the DV, it is via these pathways.</p>
+
+    <h3>Which of these correspond to LivWell variables?</h3>
+
+      <div>
+
+        <h4>Agricultural Regions (Crops/Vulnerability)</h4>
+        <ul>
+        <li>
+          Women working in agriculture (%)<br>
+          Code: WK_working_agri_p
+        </li>
+        </ul>
+        <p>
+        "Women of women who worked in the past 12 months whose occupation is in agriculture (%)"
+        </p>
+
+
+
+        <h4>Regional Shocks (Rainfall, Floods, Disasters)</h4>
+        <ul>
+        <li>
+          Share of months with negative SPEI03 anomaly exceeding 1.5 SD<br>
+          Code: spei03_anom_n1.5sd_share12
+        </li>
+        </ul>
+        <p>
+        "Share of months in time period with a negative SPEI03 anomaly exceeding threshold &lt; 1SD, 1.5SD, 2SD, 3SD"
+        </p>
+
+
+
+        <h4>Urban Heat Island Effect</h4>
+        <ul>
+        <li>
+          Women living in urban areas (%)<br>
+          Code: DM_urban_p
+        </li>
+        </ul>
+        <p>
+        "Women living in urban areas (%)"
+        </p>
+
+
+
+        <h4>Differing Access to Air Conditioning (Proxies)</h4>
+        <ul>
+        <li>
+          Women living in households with electricity (%)<br>
+          Code: EI_women_elec_p
+        </li>
+        <li>
+          Women living in households with fridge (%)<br>
+          Code: EI_women_fridge_p
+        </li>
+        </ul>
+        <p>
+        "Women living in an household with electricity (%)"<br>
+        "Women living in an household with fridge (%)"
+        </p>
+
+
+
+        <h4>Overall Regional Housing Quality</h4>
+        <ul>
+        <li>
+          Women living in households with high quality floors (%)<br>
+          Code: HH_women_floor_high_p
+        </li>
+        <li>
+          Women living in households with low quality floors (%)<br>
+          Code: HH_women_floor_low_p
+        </li>
+        </ul>
+        <p>
+        "Women living in a household with high quality floor (%)"<br>
+        "Women living in a household with low quality floor (%)"
+        </p>
+
+
+
+        <h4>Local Culture (Gender Norms)</h4>
+        <ul>
+        <li>
+          Women deciding alone how earned money is spent (%)<br>
+          Code: DP_decide_money_p
+        </li>
+        <li>
+          Women owning land alone or jointly (%)<br>
+          Code: DP_owns_land_p
+        </li>
+        </ul>
+        <p>
+        "Women currently married or in union who were paid cash for their work, who decide alone how their money earned is spent (%)"<br>
+        "Women owning land alone or jointly (%)"
+        </p>
+
+
+
+        <h4>Local Police (Reliability / Help)</h4>
+        <ul>
+        <li>
+          Human Development Index (proxy)<br>
+          Code: hdi
+        </li>
+        </ul>
+        <p>
+        "Human Development Index"
+        </p>
+
+
+
+        <h4>Alcohol Norms</h4>
+        <p>No indicator available in LivWell dataset.</p>
+
+
+
+        <h4>Household Size / Generations</h4>
+        <ul>
+        <li>
+          Average number of household members<br>
+          Code: HD_women_size_mean
+        </li>
+        </ul>
+        <p>
+        "Average number of household members"
+        </p>
+
+
+
+        <h4>Local Education Levels</h4>
+        <ul>
+        <li>
+          Average years of education<br>
+          Code: ED_educ_years_mean
+        </li>
+        </ul>
+        <p>
+        "Average number of years of education"
+        </p>
+
+
+
+        <h4>Shelter / NGO Presence</h4>
+        <p>No indicator available in LivWell dataset.</p>
+
+
+
+        <h4>Regional Water Availability</h4>
+        <ul>
+        <li>
+          Average time to get drinking water<br>
+          Code: HH_women_time_water_mean
+        </li>
+        <li>
+          Women living in households with low quality water access (%)<br>
+          Code: HH_women_water_low_p
+        </li>
+        </ul>
+        <p>
+        "Average time to get to drinking water"<br>
+        "Women living in a household with low quality water access (%)"
+        </p>
+
+
+
+        <h4>Stressfulness of Environment (Noise / Business)</h4>
+        <ul>
+        <li>
+          Regional GDP per capita<br>
+          Code: gdp
+        </li>
+        <li>
+          Women currently working (%)<br>
+          Code: WK_working_p
+        </li>
+        </ul>
+        <p>
+        "Gross Domestic Product (PPP) per capita in constant 2011 international US dollars"<br>
+        "Women currently working (%)"
+        </p>
+
+      </div>
+      </div>
+  </section>
+
+      <hr>
+<h2>Pathways in the Literature</h2>
+
+  <section class="process-entry">
+
+    <div class="entry-header">
+      <span class="entry-date">How Heat Waves Can Increase Domestic Violence</span>
+      <span class="entry-tag">Mechanisms</span>
+    </div>
+
+    <div class="entry-content">
+
+      <!-- 1 -->
+      <div class="entry-section">
+        <h4>1. Biological and Neurochemical Pathway</h4>
+
+        <div class="mermaid">
+          flowchart LR
+            A(Heat) --> B(Serotonin depletion)
+            B --> C(Irritability)
+            C --> D(Loss of self-control)
+            D --> E(Violence)
+        </div>
+
+        <div class="box">
+          <p>
+            When the body gets too hot, it tries to cool down. One way it does this is by diverting resources away from other processes, dropping a brain chemical called serotonin. Serotonin is thought to help regulate mood and keep people calm. Without enough of it, people become much more aggressive and likely to snap — and beat up their wives.
+          </p>
+
+          <p><strong>Evidence:</strong> Moderate.</p>
+
+          <p>
+            <strong>Issues:</strong> Laboratory and animal studies strongly support this link. However, it is difficult to isolate neurochemical changes as the sole cause of violence in real-world settings where social and economic factors also play a role.
+          </p>
+
+          <p class="livwell_quote">
+            Sources: Burke et al. (2015); Mulambo et al. (2025)
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- 2 -->
+      <div class="entry-section">
+        <h4>2. Economic Shock Pathway</h4>
+
+        <div class="mermaid">
+          flowchart LR
+            A(Heat) --> B(Crop failure / low productivity)
+            B --> C(Income loss)
+            C --> D(Household stress)
+            D --> E(Violence)
+        </div>
+
+        <div class="box">
+          <p>
+            In many parts of the world, extreme heat ruins crops or makes it too hot for people to work effectively. This can lead to a sudden loss of money for a family. The extreme stress of not being able to afford food or bills creates a “pressure cooker” environment at home, where male partners may use violence to vent their frustration.
+          </p>
+
+          <p>
+            Also, men often have stereotypical roles as ‘providers’. When it becomes impossible to provide, some may feel they are losing their status or authority in the family. To compensate for this loss of status and power, men might lash out at their partners.
+          </p>
+
+          <p><strong>Evidence:</strong> Good.</p>
+
+          <p>
+            <strong>Issues:</strong> Most evidence comes from developing countries and agrarian societies; the impact may be less direct in highly industrialised or air-conditioned economies, and also in countries where anti-DV norms are stronger. However, it is not clear whether the threats to men’s identity are a strong pathway.
+          </p>
+
+          <p class="livwell_quote">
+            Sources: Burke et al. (2015); Mulambo et al. (2025); Nguyen (2024)
+          </p>
+        </div>
+      </div>
+
+      <!-- 2.2 -->
+      <div class="entry-section">
+        <h4>2.2. Marrying Daughters Off Into Abusive Relationships</h4>
+
+        <div class="mermaid">
+          flowchart LR
+            A(Heat / poverty) --> B(Resource scarcity)
+            B --> C(Child marriage)
+            C --> D(Abusive relationships)
+        </div>
+
+        <div class="box">
+          <p class="livwell_quote">
+            “Lack of access to resources is a key driving factor for child marriage, with girls whose families’ incomes fall in the lowest quintile more than twice as likely to marry before the age of 18 than those whose families’ incomes are in the highest quintile.”
+          </p>
+
+          <p class="livwell_quote">
+            Sources: Pope et al. (2022); United States Department of State (2023)
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- 3 -->
+      <div class="entry-section">
+        <h4>3. Substance Use (Alcohol) Pathway</h4>
+
+        <div class="mermaid">
+          flowchart LR
+            A(Heat) --> B(Physical discomfort)
+            B --> C(Increased alcohol consumption)
+            C --> D(Reduced inhibition)
+            D --> E(Violence)
+        </div>
+
+        <div class="box">
+          <p>
+            Hot weather causes physical discomfort and thirst, which often leads to an increase in alcohol consumption. Alcohol then lowers people’s ability to control their impulses; it acts as a “trigger” that makes someone who is already hot and angry more likely to become physically abusive.
+          </p>
+
+          <p><strong>Evidence:</strong> Moderate.</p>
+
+          <p>
+            <strong>Issues:</strong> Data on alcohol involvement in domestic violence is often based on police suspicion and reports, so data is noisy, impacted by reporting biases, etc. Also, some studies found that the rise in violence happens regardless of whether the offender was sober or not.
+          </p>
+
+          <p class="livwell_quote">
+            Sources: Card & Dahl (2011); Mulambo et al. (2025); Nguyen (2024); Sanz-Barbero et al. (2018)
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- 4 -->
+      <div class="entry-section">
+        <h4>4. Changed Routines</h4>
+
+        <div class="mermaid">
+          flowchart LR
+            A(Heat) --> B(Change in daily routine)
+            B --> C(Increased time spent together)
+            C --> D(Conflict opportunities)
+            D --> E(Violence)
+        </div>
+
+        <div class="box">
+          <p>
+            Extreme heat changes how people spend their day. It might force couples to stay inside small, poorly ventilated homes to avoid the sun. Spending more time together in uncomfortable, hot conditions simply provides more opportunities for arguments to start and escalate into physical fights.
+          </p>
+
+          <p><strong>Evidence:</strong> Moderate to Good.</p>
+
+          <p>
+            <strong>Issues:</strong> It is hard to distinguish whether the heat itself causes the aggression, or if the violence is a result of people being in close proximity for longer periods.
+          </p>
+
+          <p class="livwell_quote">
+            Sources: Burke et al. (2015); Card & Dahl (2011); Mulambo et al. (2025)
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- 5 -->
+      <div class="entry-section">
+        <h4>5. Scarce Water and Dangerous Collection</h4>
+
+        <div class="mermaid">
+          flowchart LR
+            A(Heat) --> B(Water and fuel scarcity)
+            B --> C(Longer travel for resources)
+            C --> D(Exposure to danger)
+            D --> E(Violence)
+        </div>
+
+        <div class="box">
+          <p>
+            Heatwaves can cause local water sources to dry up, and women and girls are forced to travel much longer distances to get water. This extra travel often takes them into unfamiliar or dangerous areas where they are at a much higher risk of being attacked.
+          </p>
+
+          <p><strong>Evidence:</strong> Moderate.</p>
+
+          <p>
+            <strong>Issues:</strong> This pathway is primarily documented in regions suffering from instability or extreme poverty; this may not be an issue at all in high-income regions.
+          </p>
+
+          <p class="livwell_quote">
+            Sources: United States Department of State (2023)
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- 6 -->
+      <div class="entry-section">
+        <h4>6. Psychological Distress Pathway (GAAM)</h4>
+
+        <div class="mermaid">
+          flowchart LR
+            A(Heat) --> B(Negative affect / pain)
+            B --> C(Lower threshold for aggression)
+            C --> D(Violence)
+        </div>
+
+        <div class="box">
+          <p>
+            According to the General Affective Aggression Model (GAAM), the heat causes physical pain and being overheated can make people miserable. This negative feeling lowers people’s tolerance for other stressors, meaning they get angry much faster and over smaller things than they would if they were physically comfortable.
+          </p>
+
+          <p><strong>Evidence:</strong> Good.</p>
+
+          <p>
+            <strong>Issues:</strong> The exact threshold temperature for violence appears to vary by region. People in hotter climates may be somewhat more used to high temperatures than those in cooler areas.
+          </p>
+
+          <p class="livwell_quote">
+            Sources: Burke et al. (2015); Mulambo et al. (2025); Sanz-Barbero et al. (2018)
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- 7 -->
+      <div class="entry-section">
+        <h4>7. Displacement and Social Support Erosion</h4>
+
+        <div class="mermaid">
+          flowchart LR
+            A(Heat / disaster) --> B(Home destruction)
+            B --> C(Relocation to shelters)
+            C --> D(Loss of social networks)
+            D --> E(Isolation)
+            E --> F(Violence)
+        </div>
+
+        <div class="box">
+          <p>
+            When extreme climate events or natural disasters destroy homes, families are often forced to move into temporary shelters or crowded settlements. Displacement cuts women off from their usual safety nets, like nearby relatives, friends, or trusted neighbours.
+          </p>
+
+          <p>
+            Without these social circles and while living in high-stress conditions with zero privacy, it becomes much harder for women to escape an abusive partner or get help, leading to a rise in domestic violence.
+          </p>
+
+          <p><strong>Evidence:</strong> Good.</p>
+
+          <p>
+            <strong>Issues:</strong> It is often difficult to separate the violence caused specifically by the act of moving from the general psychological trauma and economic loss triggered by the disaster itself.
+          </p>
+
+          <p class="livwell_quote">
+            Sources: Pope et al. (2023)
+          </p>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- Policy -->
+      <div class="entry-section">
+        <h4>Policy Approaches Resulting From This (Brainstorm for the Project)</h4>
+
+        <div class="box">
+          <ul>
+            <li>Combat heat exposure and improve cooling access</li>
+            <li>Economic support for farmers and vulnerable households</li>
+            <li>Anti-child-marriage NGOs and financial support for families</li>
+            <li>Restrict hard alcohol access during extreme heat events</li>
+            <li>Create cooled, free third places for women</li>
+            <li>Support water infrastructure and water NGOs</li>
+            <li>Train shelter personnel to notice and respond to domestic violence</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+<hr>
+
+<div class="box">
+  <a href = 'index.html'>Back to Main</a>
+</div>
+
+</body>
