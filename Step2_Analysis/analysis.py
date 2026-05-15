@@ -111,12 +111,12 @@ from math import comb
 # lead to incorrect inference if P values are not appropriately adjusted (Bertrand et al. 2004)"
 # -- Burke, Hsiang, and Miguel (2015)
 # so: https://stackoverflow.com/questions/54349525/clustered-standard-errors-in-statsmodels-with-categorical-variables-python
-model = smf.ols("dv ~ heat + rain + C(country) + C(year)", data=livwell2).fit(
+the_holy_grail = smf.ols("dv ~ heat + rain + C(country) + C(year)", data=livwell2).fit(
     cov_type="cluster", cov_kwds={"groups": livwell2["country"]}
 )
 
 # residuals vs. fitted
-plt.scatter(model.fittedvalues, model.resid, alpha=0.3, color=brighter_purple)
+plt.scatter(the_holy_grail.fittedvalues, the_holy_grail.resid, alpha=0.3, color=brighter_purple)
 plt.axhline(0, color=pink)
 plt.xlabel("Fitted values")
 plt.ylabel("Residuals")
@@ -139,10 +139,10 @@ plt.close()
 # but it could be weak or only emerge after controlling!
 
 # AIC
-model_sq = smf.ols("dv ~ heat + I(heat**2) + rain + C(country) + C(year)", data=livwell2).fit(
+the_holy_grail_two_degree_poly_version = smf.ols("dv ~ heat + I(heat**2) + rain + C(country) + C(year)", data=livwell2).fit(
     cov_type="cluster", cov_kwds={"groups": livwell2["country"]}
 )
-print(f'\n\nBase model AIC: {model.aic},\n Square model AIC: {model_sq.aic}.\n\n')
+print(f'\n\nBase model AIC: {the_holy_grail.aic},\n Square model AIC: {the_holy_grail_two_degree_poly_version.aic}.\n\n')
 # Base model AIC: 4934.44271738837,
 # Square model AIC: 4935.098120706165.
 # that's great! Or at least quadratic doesn't fit better.
@@ -160,7 +160,7 @@ print(f'\n\nBase model AIC: {model.aic},\n Square model AIC: {model_sq.aic}.\n\n
 
 # how to qq: https://www.statsmodels.org/stable/generated/statsmodels.graphics.gofplots.qqplot.html
 
-qqplot(model.resid, line='s', markerfacecolor=blue, markeredgecolor=blue, alpha=0.5)
+qqplot(the_holy_grail.resid, line='s', markerfacecolor=blue, markeredgecolor=blue, alpha=0.5)
 plt.title("Q-Q plot of residuals")
 plt.savefig("qq.jpg")
 plt.show()
@@ -169,7 +169,7 @@ plt.close()
 # plotting the residuals:
 # googled 'residuals histogram in statsmodels' and was immediately shown this:
 # https://www.statsmodels.org/dev/generated/statsmodels.regression.linear_model.OLSResults.resid.html
-residuals = model.resid
+residuals = the_holy_grail.resid
 
 plt.hist(residuals, color=blue, edgecolor=brighter_purple)
 plt.xlabel("Residuals")
@@ -213,7 +213,7 @@ print(f"VIF for heat: {vifHeat}")
 https://www.statsmodels.org/stable/generated/statsmodels.stats.outliers_influence.OLSInfluence.html
 """
 
-influence = OLSInfluence(model)
+influence = OLSInfluence(the_holy_grail)
 # returns a tuple of two arrays: the Cook's distances themselves, and the p-values for each observation
 cooks, _ = influence.cooks_distance
 stdandardizedResiduals = influence.resid_studentized_internal
@@ -227,10 +227,10 @@ print(livwell2[abs(stdandardizedResiduals) > 3])
 
 # quite some outliers!
 # save them for possible re-analysis
-cooks_outliers = livwell2.index[cooks > threshold].tolist()
-resid_outliers = livwell2.index[abs(stdandardizedResiduals) > 3].tolist()
+cooking = livwell2.index[cooks > threshold].tolist()
+farfarawaydatapoints= livwell2.index[abs(stdandardizedResiduals) > 3].tolist()
 # use a set to keep indices from both cooks and sd, but not duplicate them
-outliers = list(set(cooks_outliers + resid_outliers))
+outliers = list(set(cooking + farfarawaydatapoints))
 print(f"Outlier count: {len(outliers)}")
 # Outlier count: 46
 
@@ -263,7 +263,7 @@ Let's look at the model!
 """
 # dandandandandannnnnnnnnnnn (drumroll):
 print('\nMODEL INCOMING:\n\n')
-print(model.summary())
+print(the_holy_grail.summary())
 print('\n\n')
 
 # PROBLEM: got a warning.
@@ -288,7 +288,7 @@ print('\n\n')
 # Prob (F-statistic):            1.11e-31
 
 print('\SIGNIFICANCE INCOMING:\n\n')
-print(f"Heat coefficient: {model.params['heat']} (SE: {model.bse['heat']}, p = {model.pvalues['heat']})")
+print(f"Heat coefficient: {the_holy_grail.params['heat']} (SE: {the_holy_grail.bse['heat']}, p = {the_holy_grail.pvalues['heat']})")
 print('\n\n')
 
 # Heat coefficient: 8.240180571416907
@@ -318,8 +318,8 @@ For each region, check if the hotter year is also
 the more violent year:
 
 2 years → score 1 or 0 directly
-3+ years → check all pairs; majority concordant = 1,
-    discordant = 0,
+3+ years → check all pairs; majority patternMatching = 1,
+    NOT_patternMatching = 0,
     ties dropped
 Count the 1s across all regions and locate that
 in a Bernoulli(p = 0.5) distribution - that's the test.
@@ -365,21 +365,21 @@ heat_dv_dicts = {}
 for region_name, region in grouped_by_region:
     # for each region, group by years and get
     # average heat and dv per year
-    reg_by_year = region.groupby('year')
-    templist = []
-    for year, info in reg_by_year:
+    region_grouped_yearly = region.groupby('year')
+    looplist = []
+    for year, info in region_grouped_yearly:
         dv_mean = info['dv'].mean()
         heat_mean = info['heat'].mean()
 
         #make a dict to append to the list
-        temp = {
+        loopdict = {
             'region' : region_name,
             'year' : year,
             'heat' : heat_mean,
             'dv' : dv_mean
         }
-        templist.append(temp)
-    heat_dv_dicts[region_name] = templist
+        looplist.append(loopdict)
+    heat_dv_dicts[region_name] = looplist
 
 # now use this for the algorithm I thought of!
 yesnolist = [] # this will contain the ones and zeros for the bernoulli
@@ -407,8 +407,8 @@ for region in heat_dv_dicts:
     # compare 1 to all others, then compare 2 to all others EXCEPT 1,
     # and 3 to all others except 1 and 2, etc. etc.
     elif len(current) > 2:
-        concordant = 0
-        discordant = 0
+        patternMatching = 0
+        NOT_patternMatching = 0
         for i in range(0,len(current)):
             # compare to all others EXCEPT the ones that were already checked!
             # i keeps track of this!
@@ -418,15 +418,15 @@ for region in heat_dv_dicts:
                 if result == 'tie':
                     continue
                 if result:
-                    concordant += 1
+                    patternMatching += 1
                 else:
-                    discordant += 1
-        # now check if there were more concordant (1)
-        # discordant (0),
+                    NOT_patternMatching += 1
+        # now check if there were more patternMatching (1)
+        # NOT_patternMatching (0),
         # or ties (drop):
-        if concordant > discordant:
+        if patternMatching > NOT_patternMatching:
             yesnolist.append(1)
-        elif discordant > concordant:
+        elif NOT_patternMatching > patternMatching:
             yesnolist.append(0)
         else:
             tiecount += 1
@@ -437,20 +437,20 @@ for region in heat_dv_dicts:
 
 # n is total number of regions
 n = len(yesnolist)
-# k is number of concordant regions.. think of a coin-flip!
+# k is number of patternMatching regions.. think of a coin-flip!
 k = sum(yesnolist)
 
-# aks: "What is the probability of getting k or more concordant regions
+# aks: "What is the probability of getting k or more patternMatching regions
 # out of n, purely by chance (p=0.5)?"
 # formula:
 # P(X >= k) =
 #    sum from i=k to n of: (n choose i) * p^i * (1-p)^(n-i)
 #
-# P(X >= k)      : probability of getting at least k concordant regions by chance
+# P(X >= k)      : probability of getting at least k patternMatching regions by chance
 # sum i=k to n   : add up all outcomes at least as extreme as what was observed
-# (n choose i)   : number of ways to get exactly i concordant regions out of n
-# p^i            : probability that i regions ARE concordant (p=0.5, like a coin flip)
-# (1-p)^(n-i)    : probability that the remaining (n-i) regions are NOT concordant
+# (n choose i)   : number of ways to get exactly i patternMatching regions out of n
+# p^i            : probability that i regions ARE patternMatching (p=0.5, like a coin flip)
+# (1-p)^(n-i)    : probability that the remaining (n-i) regions are NOT patternMatching
 
 p = 0.5
 p_value = sum(comb(n, i) * (p**i) * ((1-p)**(n-i)) for i in range(k, n+1))
@@ -476,9 +476,9 @@ print(f"One-tailed p-value: {p_value}")
 # possible explanations:
 # problem: need to interpret my results without too much biased, p-hacking adaptation.
 
-# ----------------------------------------
+#
 # No real effect at the time scale I use / aggregation is too coarse
-# ----------------------------------------
+#
 # Heat might only affect violence in the very short term (like during very hot days),
 # or on very long time scales (how to test that?)
 # but my data averages everything over a whole year.
@@ -487,25 +487,25 @@ print(f"One-tailed p-value: {p_value}")
 # This turns detailed temperature changes into one simple number,
 # which removes a lot of useful information.
 
-# ----------------------------------------
+#
 # Measurement error
-# ----------------------------------------
+#
 # My DV data comes from surveys, and people may not report violence accurately.
 # My heat variable is also smoothed over many months.
 # When both variables are noisy, real effects get blurred and look like zero.
 # And the binomial test is not very powerful at all.
 
-# ----------------------------------------
+#
 # Not enough change within regions
-# ----------------------------------------
+#
 # Within each region, heat does not change that much from year to year.
 # If nothing really changes, the model cannot detect any effect.
 # Maybe average heat differences are just too small
 # NOTE: try a model that only includes large differences!
 
-# ----------------------------------------
+#
 # Cross-sectional bias in Model 2 (it's actually a 0 effect)
-# ----------------------------------------
+#
 # Hotter regions are often also poorer or more rural.
 # These factors could impact DV.
 # So it may look like heat causes violence, but it’s actually these other differences.
@@ -514,9 +514,9 @@ print(f"One-tailed p-value: {p_value}")
 # These differences don’t change much over time,
 # but they can create strong differences between regions.
 
-# ----------------------------------------
+#
 # Omitted variables
-# ----------------------------------------
+#
 # There may be other things affecting violence (like economic stress or conflict)
 # that I did not include in the model.
 # If those are linked to heat, results can be wrong.
@@ -544,8 +544,8 @@ def run_binomial(heat_dv_dicts, min_heat_diff):
             else:
                 yesnolist.append(int(hotter))
         elif len(current) > 2:
-            concordant = 0
-            discordant = 0
+            patternMatching = 0
+            NOT_patternMatching = 0
             for i in range(0, len(current)):
                 for j in range((i + 1), len(current)):
                     selectedyears = [current[i], current[j]]
@@ -553,12 +553,12 @@ def run_binomial(heat_dv_dicts, min_heat_diff):
                     if result == 'tie':
                         continue
                     if result:
-                        concordant += 1
+                        patternMatching += 1
                     else:
-                        discordant += 1
-            if concordant > discordant:
+                        NOT_patternMatching += 1
+            if patternMatching > NOT_patternMatching:
                 yesnolist.append(1)
-            elif discordant > concordant:
+            elif NOT_patternMatching > patternMatching:
                 yesnolist.append(0)
             else:
                 tiecount += 1
@@ -578,15 +578,15 @@ def run_binomial(heat_dv_dicts, min_heat_diff):
 grouped_by_region = livwell2.groupby('region_id')
 heat_dv_dicts = {}
 for region_name, region in grouped_by_region:
-    reg_by_year = region.groupby('year')
-    templist = []
-    for year, info in reg_by_year:
+    region_grouped_yearly = region.groupby('year')
+    looplist = []
+    for year, info in region_grouped_yearly:
         dv_mean = info['dv'].mean()
         heat_mean = info['heat'].mean()
-        temp = {'region': region_name, 'year': year,
+        loopdict = {'region': region_name, 'year': year,
                 'heat': heat_mean, 'dv': dv_mean}
-        templist.append(temp)
-    heat_dv_dicts[region_name] = templist
+        looplist.append(loopdict)
+    heat_dv_dicts[region_name] = looplist
 
 # Now check for only large heat differences!
 
@@ -682,7 +682,7 @@ from scipy.stats import binom
 # that my test correctly rejects the null (= power)?
 def compute_power(n, p_true, alpha=0.05):
     # Step 1: find the critical value.
-    # That is: what is the minimum number of concordant regions
+    # That is: what is the minimum number of patternMatching regions
     # needed to reject H0 at alpha = 0.05, one-tailed?
     critical_value = binom.ppf(1 - alpha, n, 0.5)
 

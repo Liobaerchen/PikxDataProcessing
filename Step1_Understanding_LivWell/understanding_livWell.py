@@ -24,30 +24,30 @@ import geopandas as gpd
 
 
 
-livwell_all = pd.read_csv("livwell.csv")
-print(livwell_all.head())
+complete_livwell = pd.read_csv("livwell.csv")
+print(complete_livwell.head())
 
 # [5 rows x 409 columns]
 # I extract the ones that are relevant for the primary RQ:
 
-relevant_cols = [
+cols_i_need = [
     "DV_phys_12m_p",          # 'Women who experienced physical violence in the past 12 months (%)'
     "tmp_anom_p2sd_share12",  # 'Share of months in the past 12 months with a positive temperature anomaly exceeding 2 SD' --> LOCAL average! NOT global!
     "year",                   # time fixed effects
     "region_num_harmonized",  # region fixed effects
-    "country_code",           # optional: maybe use for world-map later
+    "country_code",           # optional: maybe use for wholewideworld-map later
 ]
 
 # and to control for rainfall:
 rainfall = "pre_anom_mean12"  # Mean deviation from long-run precipitation (12m)
 
 livwell1 = pd.DataFrame({
-    'dv': livwell_all[relevant_cols[0]],
-    'heat': livwell_all[relevant_cols[1]],
-    'year': livwell_all[relevant_cols[2]],
-    'region': livwell_all[relevant_cols[3]],
-    'country': livwell_all[relevant_cols[4]],
-    'rain': livwell_all[rainfall]
+    'dv': complete_livwell[cols_i_need[0]],
+    'heat': complete_livwell[cols_i_need[1]],
+    'year': complete_livwell[cols_i_need[2]],
+    'region': complete_livwell[cols_i_need[3]],
+    'country': complete_livwell[cols_i_need[4]],
+    'rain': complete_livwell[rainfall]
 })
 
 print(livwell1.head(50))
@@ -59,57 +59,57 @@ Excluding missing data:
 """
 # NOTE: Issue! DV variable has many NAs! Exclude, but be CLEAR about
 # what is missing.
-total_rows = len(livwell1['dv'])
-na_rows = len(livwell1['dv'][livwell1['dv'].isna()])
-print(f'total rows: {total_rows}')
-print(f'rows where dv is na: {na_rows}')
-print(f'so, proportion excluded: {na_rows/total_rows}')
+nr_of_rows = len(livwell1['dv'])
+rowsWithDV_NA = len(livwell1['dv'][livwell1['dv'].isna()])
+print(f'total rows: {nr_of_rows}')
+print(f'rows where dv is na: {rowsWithDV_NA}')
+print(f'so, proportion excluded: {rowsWithDV_NA/nr_of_rows}')
 
 # now, how much am I excluding if I exlude ALL NAs for any rows?
-any_missing = livwell1.isna().any(axis=1)
-any_na_rows = len(livwell1[any_missing])
-print(f'rows with any missing values: {any_na_rows}')
-print(f'thus percentage total excluded: {any_na_rows/total_rows}')
+rowsWith_ANY_NA= livwell1.isna().any(axis=1)
+any_rowsWithDV_NA = len(livwell1[rowsWith_ANY_NA])
+print(f'rows with any missing values: {any_rowsWithDV_NA}')
+print(f'thus percentage total excluded: {any_rowsWithDV_NA/nr_of_rows}')
 # almost all exclusions are due to DV! But it is my main outcome, so this is necessary.
 
 # check what I am excluding:
-year_exclusion = livwell1.groupby("year")["dv"].apply(lambda x: x.isna().mean())
+how_many_year_did_I_delete = livwell1.groupby("year")["dv"].apply(lambda x: x.isna().mean())
 # . mean is turning the 1s and 0s from isna into a percentage
-print(f'\nHow much am I excluding from which years?:\n {year_exclusion}')
+print(f'\nHow much am I excluding from which years?:\n {how_many_year_did_I_delete}')
 
-country_exclusion = livwell1.groupby("country")["dv"].apply(lambda x: x.isna().mean())
-print(f'\nHow much am I excluding from which countries?:\n {country_exclusion}')
+which_countries_did_I_delete = livwell1.groupby("country")["dv"].apply(lambda x: x.isna().mean())
+print(f'\nHow much am I excluding from which countries?:\n {which_countries_did_I_delete}')
 
 # .agg lets me compute all four statistics for each column in each group at once
-climate_comparison = livwell1.groupby(any_missing)[["heat", "rain"]].agg(
+which_climates_dididelete = livwell1.groupby(rowsWith_ANY_NA)[["heat", "rain"]].agg(
     ["count", "mean", "std", "median"]
 ).round(3)
 
 print("\nClimate comparison (DV missing vs observed):\n")
-print(climate_comparison)
+print(which_climates_dididelete)
 # heat difference is 0.001; totally negligible
 # but the retained data is from wetter regions: difference observed - missing
 # is ≈ +0.1 -> remember this for later!
 # DV availability is systematically related to rainfall conditions
 
 # ~ means NOT. So without the rows where sth is missing:
-clean_livwell1 = livwell1[~any_missing].copy()
-print(clean_livwell1.head())
+cleaned_sweeped_vacuumed_livwell1 = livwell1[~rowsWith_ANY_NA].copy()
+print(cleaned_sweeped_vacuumed_livwell1.head())
 
 print('how do the regions work? In the paper, it seemed like there may be several countries with the same region.')
 print('e.g. region 1 Nigeria is different from region 1 Germany')
-print(clean_livwell1.groupby("region")["country"].nunique())
+print(cleaned_sweeped_vacuumed_livwell1.groupby("region")["country"].nunique())
 # TRUE! So make a unique identifier
-clean_livwell1["region_id"] = clean_livwell1["country"].astype(str) + "_" + clean_livwell1["region"].astype(str)
+cleaned_sweeped_vacuumed_livwell1["region_id"] = cleaned_sweeped_vacuumed_livwell1["country"].astype(str) + "_" + cleaned_sweeped_vacuumed_livwell1["region"].astype(str)
 # NOTE to self: use region_id for analyses!
 
 # describe the final dataset
-print(clean_livwell1.shape) # 758 observations
-print(f'\nnumber of countries: {clean_livwell1["country"].nunique()}.\n')
-print(f'number of regions: {clean_livwell1["region_id"].nunique()}.\n')
-region_years = clean_livwell1.groupby("region_id")["year"].nunique() # how many years do I have in each region?
-print(region_years.describe())
-print((region_years >= 5).sum(), "regions with >=5 years")
+print(cleaned_sweeped_vacuumed_livwell1.shape) # 758 observations
+print(f'\nnumber of countries: {cleaned_sweeped_vacuumed_livwell1["country"].nunique()}.\n')
+print(f'number of regions: {cleaned_sweeped_vacuumed_livwell1["region_id"].nunique()}.\n')
+year_per_region = cleaned_sweeped_vacuumed_livwell1.groupby("region_id")["year"].nunique() # how many years do I have in each region?
+print(year_per_region.describe())
+print((year_per_region >= 5).sum(), "regions with >=5 years")
 # 758 observations
 # 39 countries
 # 349 regions, BUT ONLY 24 with more than 5 years??? oH OH
@@ -118,15 +118,15 @@ print((region_years >= 5).sum(), "regions with >=5 years")
 # Should I use countries as identifiers instead?
 
 # how many years do I have in each country?
-country_years = clean_livwell1.groupby("country")["year"].nunique()
-print(f'\nYears available per country:\n{country_years.sort_values()}\n')
+years_per_country = cleaned_sweeped_vacuumed_livwell1.groupby("country")["year"].nunique()
+print(f'\nYears available per country:\n{years_per_country.sort_values()}\n')
 
 # list of all countries where I have more than 5 years available
-countries_more_than_5_years = country_years[country_years > 5]
+countries_more_than_5_years = years_per_country[years_per_country > 5]
 print(f'Countries with more than 5 years available:\n{countries_more_than_5_years}\n')
 
 # map of countries to years available
-country_to_years = clean_livwell1.groupby("country")["year"].unique()
+country_to_years = cleaned_sweeped_vacuumed_livwell1.groupby("country")["year"].unique()
 print(f'Country -> years available:\n{country_to_years}\n')
 # THIS IS ALSO A PROBLEM
 
@@ -174,24 +174,24 @@ finally: CLUSTER standard errors (consider Leonie's hint: Conley standard error)
 
 # for this I need within country variation:
 print('\n\n within country variation:')
-within_country_heat_var = clean_livwell1.groupby("country")["heat"].std()
+within_country_heat_var = cleaned_sweeped_vacuumed_livwell1.groupby("country")["heat"].std()
 print(within_country_heat_var.sort_values())
 # BGD, EGY, GAB, GHA, BEN will be excluded
 
 print('\n\ncollinearity?')
-print(clean_livwell1[["heat", "rain"]].corr())
+print(cleaned_sweeped_vacuumed_livwell1[["heat", "rain"]].corr())
 
 # Drop countries with zero within-country heat variation (they don't matter because of the fixed effects)
 # and will inflate my N
-zero_var_countries = within_country_heat_var[within_country_heat_var == 0].index.tolist()
-nan_var_countries = within_country_heat_var[within_country_heat_var.isna()].index.tolist()
-excluded_countries = zero_var_countries + nan_var_countries
+countries_withNOvar = within_country_heat_var[within_country_heat_var == 0].index.tolist()
+countries_with_NA_var = within_country_heat_var[within_country_heat_var.isna()].index.tolist()
+excluded_countries = countries_withNOvar + countries_with_NA_var
 print(f'Excluding countries with no within-country heat variation: {excluded_countries}')
 
-clean_livwell2 = clean_livwell1[~clean_livwell1["country"].isin(excluded_countries)].copy()
+clean_livwell2 = cleaned_sweeped_vacuumed_livwell1[~cleaned_sweeped_vacuumed_livwell1["country"].isin(excluded_countries)].copy()
 
-print(f'Observations before: {len(clean_livwell1)}, after: {len(clean_livwell2)}')
-print(f'Countries before: {clean_livwell1["country"].nunique()}, after: {clean_livwell2["country"].nunique()}')
+print(f'Observations before: {len(cleaned_sweeped_vacuumed_livwell1)}, after: {len(clean_livwell2)}')
+print(f'Countries before: {cleaned_sweeped_vacuumed_livwell1["country"].nunique()}, after: {clean_livwell2["country"].nunique()}')
 # Observations before: 758, after: 736
 # Countries before: 39, after: 34
 # This is fine.
@@ -217,13 +217,13 @@ blue = "#355C7D"
 colors = [orange, pink, brighter_purple, darker_purple, blue]
 
 from matplotlib.colors import LinearSegmentedColormap
-hist_cmap = LinearSegmentedColormap.from_list("hist_gradient", [blue, orange, pink])
+colormap_hist = LinearSegmentedColormap.from_list("hist_gradient", [blue, orange, pink])
 
 with PdfPages("Understanding_livWell.pdf") as pdf:
     # DV:
     n, bins, patches = plt.hist(clean_livwell2["dv"], bins=30)
     for patch, left in zip(patches, bins[:-1]):
-        patch.set_facecolor(hist_cmap((left - bins[0]) / (bins[-1] - bins[0])))
+        patch.set_facecolor(colormap_hist((left - bins[0]) / (bins[-1] - bins[0])))
     sns.kdeplot(clean_livwell2["dv"], color=orange)
     plt.title("DV Distribution")
     plt.xlabel('DV in % of surveyed women')
@@ -233,7 +233,7 @@ with PdfPages("Understanding_livWell.pdf") as pdf:
     # heat:
     n, bins, patches = plt.hist(clean_livwell2["heat"], bins=20)
     for patch, left in zip(patches, bins[:-1]):
-        patch.set_facecolor(hist_cmap((left - bins[0]) / (bins[-1] - bins[0])))
+        patch.set_facecolor(colormap_hist((left - bins[0]) / (bins[-1] - bins[0])))
     sns.kdeplot(clean_livwell2["heat"], color=orange)
     plt.title("Heat distribution")
     plt.xlabel('share of months with a positive temperature anomaly > 2 SD')
@@ -243,7 +243,7 @@ with PdfPages("Understanding_livWell.pdf") as pdf:
     # rainfall:
     n, bins, patches = plt.hist(clean_livwell2["rain"], bins=30)
     for patch, left in zip(patches, bins[:-1]):
-        patch.set_facecolor(hist_cmap((left - bins[0]) / (bins[-1] - bins[0])))
+        patch.set_facecolor(colormap_hist((left - bins[0]) / (bins[-1] - bins[0])))
     plt.title("Rainfall")
     plt.xlabel('Mean deviation from long-run precipitation over 12 months')
     pdf.savefig()
@@ -258,10 +258,10 @@ with PdfPages("Understanding_livWell.pdf") as pdf:
 
     # time trends (standardized bc heat is in sds and wasn't visible)
     # group and get the mean of dv and heat within each year
-    time_trends = clean_livwell2.groupby("year")[["dv", "heat"]].mean()
+    dv_heat_means = clean_livwell2.groupby("year")[["dv", "heat"]].mean()
     # standardize; divide deviation from mean by sd for both heat and dv
-    time_trends_std = (time_trends - time_trends.mean()) / time_trends.std()
-    time_trends_std.plot(color=[colors[4], colors[1]], marker="")
+    dv_heat_means_std = (dv_heat_means - dv_heat_means.mean()) / dv_heat_means.std()
+    dv_heat_means_std.plot(color=[colors[4], colors[1]], marker="")
     plt.gca().xaxis.set_major_locator(plt.MaxNLocator(integer=True)) # This means "only show integer tick labels"
     plt.title("Time trends of heat and DV (standardized)")
     pdf.savefig()
@@ -280,14 +280,14 @@ with PdfPages("Understanding_livWell.pdf") as pdf:
 
     # also do some checks with maps (Annika's recommendation)
     # DV:
-    world = gpd.read_file("https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip")
+    wholewideworld = gpd.read_file("https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip")
     # match the dataframe codes with the gpd countries
     country_data = clean_livwell2.groupby("country")[["dv", "heat"]].mean().reset_index()
     # codes in the dataset are same as some from the library; can be merged easily
-    world = world.merge(country_data, how="left", left_on="SOV_A3", right_on="country")
+    wholewideworld = wholewideworld.merge(country_data, how="left", left_on="SOV_A3", right_on="country")
     fig, ax = plt.subplots(figsize=(12, 6))
     # dv map
-    world.plot(
+    wholewideworld.plot(
         column="dv",
         cmap="OrRd",
         legend=True,
@@ -301,7 +301,7 @@ with PdfPages("Understanding_livWell.pdf") as pdf:
 
     # and heat map:
     fig, ax = plt.subplots(figsize=(12, 6))
-    world.plot(
+    wholewideworld.plot(
         column="heat",
         cmap="coolwarm",
         legend=True,
@@ -315,12 +315,12 @@ with PdfPages("Understanding_livWell.pdf") as pdf:
 
     # finally data coverage map
     # count how many years are available per country
-    country_years = clean_livwell2.groupby("country")["year"].nunique().rename("n_years")
+    years_per_country = clean_livwell2.groupby("country")["year"].nunique().rename("n_years")
     country_data = clean_livwell2.groupby("country")[["dv", "heat"]].mean().reset_index()
-    country_data = country_data.merge(country_years, on="country")
-    world = world.merge(country_data, how="left", left_on="SOV_A3", right_on="country")
+    country_data = country_data.merge(years_per_country, on="country")
+    wholewideworld = wholewideworld.merge(country_data, how="left", left_on="SOV_A3", right_on="country")
     fig, ax = plt.subplots(figsize=(12, 6))
-    world.plot(
+    wholewideworld.plot(
         column="n_years",
         cmap="RdYlGn",
         legend=True,
@@ -408,18 +408,18 @@ print(f"\nRegions with more than one year: {regions_with_several_years}.\n")
 
 # make a dataset for this:
 # find regions with more than 1 year
-valid_regions = []
+usableRegions = []
 
 for r in livwellyearsbyregion.index:
     if livwellyearsbyregion[r] > 1:
-        valid_regions.append(r)
+        usableRegions.append(r)
 
 # create new dataset with only those regions
-non_parametric_livwell = clean_livwell2[clean_livwell2["region_id"].isin(valid_regions)].copy()
+livwell_for_binom = clean_livwell2[clean_livwell2["region_id"].isin(usableRegions)].copy()
 
 # check
-print(f"Number of regions in new dataset: {non_parametric_livwell['region_id'].nunique()}")
-print(f"Number of observations in new dataset: {len(non_parametric_livwell)}")
+print(f"Number of regions in new dataset: {livwell_for_binom['region_id'].nunique()}")
+print(f"Number of observations in new dataset: {len(livwell_for_binom)}")
 
 
 

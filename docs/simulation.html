@@ -10,18 +10,326 @@
 
 <body>
 
+  <div class="topnav">
+
+      <div class="topnav-title">
+          Living Well? — A Global Data Analysis of Heat and Domestic Violence
+      </div>
+
+      <div class="topnav-links">
+          <a href="index.html">Main</a>
+          <a href="PresentingLivWell_polished.html">LivWell</a>
+          <a href="analysis.html">Analysis</a>
+          <a href="LivWell_data_availability.html">Data</a>
+          <a href="simulation.html">Simulation</a>
+          <a href="causal_diagram.html">DAG</a>
+          <a href="processbook.html">Process Book</a>
+          <a href="references.html">References</a>
+      </div>
+
+  </div>
+  
 <h1>Prediction Tool</h1>
 
+<div>
+<h2>Model:</h2>
+<p>As a reminder, here is the model that the following visualisation is based on:</p>
+<div class="box" style="flex:1;">
+  <h2>Model 2</h2>
+  <div class="equation">DV<sub>rct</sub> = β · Heat<sub>rct</sub> + γ · Rain<sub>rct</sub> + δ<sub>c</sub> + τ<sub>t</sub> + ε<sub>rct</sub></div>
+  <ul>
+    <li><b>FE:</b> Country + year</li>
+    <li><b>Controls:</b> Rainfall, clustered SEs</li>
+    <li><b>Variation:</b> Within-country, across regions</li>
+    <li><b>Question:</b> Are hotter regions within a country more violent?</li>
+  </ul>
+</div>
+<h2>The coefficient for heat was <b>8.2</b> and significantly different from 0!</h2>
+<p>A 10 percentage-point increase in extreme-heat-month count
+is associated with a roughly <b>0.8 percentage-point increase</b>
+in DV prevalence (controlling for rainfall, country, and year fixed effects etc. etc.).<br><br>
+
+An important concept to understand for this analysis is this:
+</p>
 <p>
-ADD EXPLANATION OF THE SIMULATION HERE!
+  A 0.8 percentage point increase seems small, but it is meaningful if you consider:<br>
+  Even if the increase in risk for each person is tiny,
+  multiplying that small increase over a large population
+  can produce a huge number of additional cases overall.
 </p>
 
+<p>
+  <b>Imagine:</b>
+  1,000,000 women experience DV in a country<br>
+  0.8% increase -> ~8,000 additional cases
+</p>
+
+<hr>
+</div>
+
+
+
+<div>
+  <h1>Visualisation of The Effect</h1>
 <iframe
   src="https://pikxdataprocessing-1.onrender.com"
   width="100%"
   height="900px"
   style="border:none;">
 </iframe>
+
+<hr>
+</div>
+
+<div>
+
+<h2>How this Plot Works:</h2>
+
+<div style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center; align-items:stretch;">
+
+<div class="box" style="flex:1; min-width:320px; max-width:520px;">
+<h2>The Plot is Based on Three Things</h2>
+
+<ul>
+  <li>
+    A statistical relationship between Heat(waves) and Domestic Violence,
+    estimated based on the LivWell dataset
+  </li>
+
+  <li>
+    Differing Domestic Violence Prevalences in Different Countries
+  </li>
+
+  <li>
+    Three possible climate projections from the
+    <a href="https://ipcc-browser.ipcc-data.org/browser/dataset/6171" target="_blank">
+      Intergovernmental Panel on Climate Change Interactive Atlas dataset
+    </a>:
+    a low emissions scenario, a medium, and a high emissions scenario
+  </li>
+</ul>
+</div>
+<hr>
+<div class="box" style="flex:1; min-width:320px; max-width:520px;">
+<h2>What Represents What?</h2>
+
+<ul>
+  <li>
+    <b>Bubble SIZE</b> represents DV prevalence
+  </li>
+
+  <li>
+    <b>Bubble COLOUR</b> represents heat
+  </li>
+
+  <li>
+    <b>Lines</b> represent expected levels of DV in the selected country
+    across decades, in three different heating scenarios
+  </li>
+
+  <li>
+    The map always visualises the <b>high warming scenario</b>
+  </li>
+
+  <li>
+    The red outline marks the currently selected country
+  </li>
+</ul>
+</div>
+</div>
+
+<div>
+
+<h2>How Predicted DV is Calculated</h2>
+
+<p>
+Predicted DV for a country is based on baseline DV in that country
+(based on the
+<a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/QSFXLQ" target="_blank">
+LivWell dataset
+</a>)
++ the increase in heatwave exposure for a certain year × my coefficient.
+</p>
+
+<div class="equation">
+Predicted DV = Baseline DV + (Increase in Heatwave Exposure × β)
+</div>
+
+<p>
+Again:
+</p>
+
+<p class="livwell_quote">
+A 10 percentage-point increase in extreme-heat-month count
+is associated with a roughly <b>0.8 percentage-point increase</b>
+in DV prevalence.
+</p>
+<hr>
+</div>
+
+<div>
+
+<h2>The Three IPCC Heating Scenarios</h2>
+
+<p>
+The three climate scenarios come from the
+<a href="https://ipcc-browser.ipcc-data.org/browser/dataset/6171" target="_blank">
+Intergovernmental Panel on Climate Change Interactive Atlas dataset
+</a>.
+</p>
+
+<p>
+There are three scenarios:
+</p>
+
+<ul>
+  <li>
+    a <b>~2.1°C</b> increase in heat from 2015 until 2100
+  </li>
+
+  <li>
+    a <b>~5.6°C</b> increase in heat until 2100
+  </li>
+
+  <li>
+    and a <b>~6.8°C</b> increase in heat until 2100
+  </li>
+</ul>
+
+<p>
+The three lines visualise how DV is assumed to develop over the decades
+in the three different scenarios.
+</p>
+
+<p>
+The lines seem close together, but don't let that fool you!
+Zoom into the plot to see how much they diverge.
+</p>
+
+<p>
+And consider this very interesting statistical observation by
+<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2560511/">
+Geoffrey Rose
+</a>:
+</p>
+
+<p class="livwell_quote">
+Small effects matter a lot when they affect large populations!
+</p>
+
+<p>
+Look at the projections below!
+Different increases in climate correspond to thousands or even millions more women experiencing DV!
+</p>
+<hr>
+</div>
+
+<div>
+
+<h2>How the “Women Affected” Projections Work</h2>
+
+<p>
+The projections for women experiencing DV do this:
+</p>
+
+<ul>
+  <li>
+    take predicted DV prevalence
+    (based on the coefficient for effect of heat on DV x IPCC heat projection),
+  </li>
+
+  <li>
+    multiply it by female population
+    (based on
+    <a href="https://data.worldbank.org/indicator/SP.POP.TOTL" target="_blank">
+      World Bank 2024 population estimates
+    </a>),
+  </li>
+
+  <li>
+    and compute how many additional women could be affected.
+  </li>
+</ul>
+<hr>
+</div>
+
+<div>
+
+<h2>Important Context About the Heat Measure</h2>
+
+<p>
+The climate projections are based on the IPCC variable:
+</p>
+
+<p class="equation">
+tx35ba: "Bias adjusted monthly count of days with maximum near-surface temperature above 35°C."
+</p>
+
+<p>
+However, my regression model used a somewhat different heat measure.
+The original analysis was based on extreme-heat months (2SD > average temp.),
+but the IPCC data measured days above 35°C.
+</p>
+
+<p>
+35°C is not necessarily the same thing as "2 standard deviations above normal temperature".
+These are slightly different measures of heat.
+</p>
+
+
+</div>
+
+<div class="box">
+
+<h2>Finally, a Disclaimer</h2>
+
+<p>
+This is a mere visualisation, not a scientific projection.
+My analysis was NOT perfectly controlled.
+Further, the calculations are very approximate,
+based on singular and differing data sources.
+</p>
+
+<p>
+Several strong assumptions are being made.
+</p>
+
+<ul>
+  <li>
+    The model assumes the same relationship continues:
+    across decades,
+    societies,
+    adaptation levels,
+    infrastructure,
+    policy changes,
+    migration,
+    economic development... etc. etc.
+  </li>
+
+  <li>
+    Global heatwave exposure is used as an approximation for local exposure.
+  </li>
+
+  <li>
+    Country averages are used instead of detailed regional variation.
+  </li>
+
+  <li>
+    The binomial check did not support the effect strongly.
+  </li>
+</ul>
+
+<p>
+So in summary: This visualisation is illustrative rather than predictive.
+</p>
+
+</div>
+
+<hr>
+<div class="box">
+  <a href = 'index.html'>Back to Main</a>
+</div>
+</div>
 
 </body>
 </html>

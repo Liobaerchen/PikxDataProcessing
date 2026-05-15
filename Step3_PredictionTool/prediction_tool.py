@@ -111,9 +111,9 @@ def forcing_to_warming(forcing, lambdaa=0.8):
     """
     return lambdaa * forcing
 
-radiative_forcing_by2100 = [2.6, 7.0, 8.5]
+radiative_forcing_2100 = [2.6, 7.0, 8.5]
 warmingsby2100 = []
-for forcing in radiative_forcing_by2100:
+for forcing in radiative_forcing_2100:
     warmingsby2100.append(forcing_to_warming(forcing))
 
 print(f"global warming in degrees that the IPCC scenarios are based on:\n{warmingsby2100}")

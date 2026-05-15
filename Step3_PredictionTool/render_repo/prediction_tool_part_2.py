@@ -3,6 +3,8 @@
 # May 12th, 2026
 
 # NOTE Simon's recommendation: bokeh!
+# If you want to run this script, please run it with bokeh!
+# use: bokeh serve --show prediction_tool_part_2.py
 
 """
 This is part two of my visualisation of my predictions.
@@ -21,11 +23,11 @@ from bokeh.models import ColumnDataSource, Select, Div, Slider, LinearColorMappe
 from bokeh.layouts import column, row
 from bokeh.palettes import RdYlGn
 
-df_2_1 = pd.read_csv("heatwaves_2_1.csv")
-df_5_6 = pd.read_csv("heatwaves_5_6.csv")
-df_6_8 = pd.read_csv("heatwaves_6_8.csv")
+heatwaves21 = pd.read_csv("heatwaves_2_1.csv")
+heatwaves56 = pd.read_csv("heatwaves_5_6.csv")
+heatwaves68 = pd.read_csv("heatwaves_6_8.csv")
 
-print(df_2_1.head())
+print(heatwaves21.head())
 
 
 # okay, great!
@@ -47,10 +49,10 @@ Loads LivWell CSV and returns a dictionary:
 country_code -> average DV
 """
 # robust read (handles comma or tab separation)
-df = pd.read_csv("clean_livwell.csv")
+cleanLivWell = pd.read_csv("clean_livwell.csv")
 
 # compute mean DV per country
-country_means = df.groupby("country")["dv"].mean()
+country_means = cleanLivWell.groupby("country")["dv"].mean()
 
 # convert to dict
 country_dv = country_means.to_dict()
@@ -64,18 +66,18 @@ print(country_dv)
 # Source: https://data.worldbank.org/indicator/SP.POP.TOTL
 
 # World Bank file needs skipping first rows until header (got an error before)
-df = pd.read_csv("worldbank_population.csv", skiprows=4)
+worldbankPop = pd.read_csv("worldbank_population.csv", skiprows=4)
 
 # keep only needed columns
-df = df[["Country Code", "2024"]].copy()
+worldbankPop = worldbankPop[["Country Code", "2024"]].copy()
 
 # turn to int or float
-df["2024"] = pd.to_numeric(df["2024"], errors="coerce")
+worldbankPop["2024"] = pd.to_numeric(worldbankPop["2024"], errors="coerce")
 # get rid of na
-df = df.dropna(subset=["2024"])
+worldbankPop = worldbankPop.dropna(subset=["2024"])
 
 # make the population dictionary
-country_pop = dict(zip(df["Country Code"], df["2024"]))
+country_pop = dict(zip(worldbankPop["Country Code"], worldbankPop["2024"]))
 
 # keep only the countries that are in dv:
 common_countries = set(country_dv.keys()) & set(country_pop.keys())
@@ -86,13 +88,6 @@ for c in common_countries:
 print(pop_df)
 
 # __________________________________________________
-
-# PLAN:
-#     bokeh.sampledata.world_countries has country borders built in — no shapefile needed
-# Precompute all predicted_dvections once upfront (nested dict: scenario → year → country → DV), so callbacks are instant
-# Map scenario: fixed to medium (5.6°C) — simplest, add selector later if needed
-# Two callbacks only: country_select fillPlotsWithDatas line chart + text; year_slider fillPlotsWithDatas map
-# Layout: country selector on top, line chart and map side by side, text div below
 
 # Before all, map the country abbreviations to actual names for readability
 # NOTE: This Dictionary is AI generated, I was too lazy to type all of this out
@@ -225,19 +220,19 @@ country_temp = {
 
 # and normalise it for later plotting:
 temp_values = np.array(list(country_temp.values()))
-t_min = temp_values.min()
-t_max = temp_values.max()
+minTemp = temp_values.min()
+maxTemp = temp_values.max()
 
-country_temp_norm = {
-    c: (t - t_min) / (t_max - t_min)
+normalised_country_temps = {
+    c: (t - minTemp) / (maxTemp - minTemp)
     for c, t in country_temp.items()
 }
 
 # Now I make lists that have data for bokeh
-map_x = [] # x-coordinates (Mercator)
-map_y = [] # y-coordinates (Mercator)
-map_codes = [] # ISO country codes (like "NGA")
-map_names = []
+xCoords = [] # x-coordinates (Mercator)
+yCoords = [] # y-coordinates (Mercator)
+mapISOs = [] # ISO country codes (like "NGA")
+mapFullNames = []
 
 # loop over the geographic data I have for my countries
 for c, coords in centers.items():
@@ -246,22 +241,22 @@ for c, coords in centers.items():
         # use the function that turns these coordinates into the bokeh format
         mx, my = to_merc(coords[0], coords[1])
         # append
-        map_x.append(mx)
-        map_y.append(my)
-        map_codes.append(c)
-        map_names.append(abbrToCountry.get(c, c))
+        xCoords.append(mx)
+        yCoords.append(my)
+        mapISOs.append(c)
+        mapFullNames.append(abbrToCountry.get(c, c))
         # now the lists have the x,y coords of the country, + the code and the name,
         # all with the same index
 
 BETA = 8.24 # FROM MY REGRESSION! IMPORTANT!
 # these are the years that are covered in the IPCC scenarios
-years = df_2_1.year.tolist()
+years = heatwaves21.year.tolist()
 # Store them in a dict for easier use -> so I remember what each one is
-scens = {"Low": df_2_1, "Med": df_5_6, "High": df_6_8}
+IPCCScenarios = {"Low": heatwaves21, "Med": heatwaves56, "High": heatwaves68}
 
 predicted_dv = {}
 # loop over each scenario in the dict
-for scenario_name, scenario_df in scens.items():
+for scenario_name, scenario_df in IPCCScenarios.items():
     predicted_dv[scenario_name] = {}
     # get the first percentage of heat-wave countries (2015 I think)
     baseline = scenario_df.iloc[0].share_earth_in_heatwave
@@ -292,11 +287,11 @@ for scenario_name, scenario_df in scens.items():
 # ##### 3. Making Dataframe-like-things for bokeh
 # Tutorial on the column data source thingy:
 # https://docs.bokeh.org/en/2.3.3/docs/user_guide/data.html
-mapWithCoordinatesEtc = ColumnDataSource(data={'x': map_x, 'y': map_y, 'code': map_codes, 'names': map_names, 'color_val': [0]*len(map_codes), 'size': [20]*len(map_codes)})
+mapWithCoordinatesEtc = ColumnDataSource(data={'x': xCoords, 'y': yCoords, 'code': mapISOs, 'names': mapFullNames, 'color_val': [0]*len(mapISOs), 'size': [20]*len(mapISOs)})
 # added this bc I want a red circle for the selected country and this will allow that
 selectedCountry = ColumnDataSource(data={'x': [], 'y': [], 'size': []})
 # this is for the line chart
-line_src = ColumnDataSource(data={'year': years,
+lineplot_Data = ColumnDataSource(data={'year': years,
     # this just makes an empty chart that is then later filled with data when the user clicks a country
     'lowWarming': [0]*len(years),
     'mediumWarming': [0]*len(years),
@@ -334,9 +329,9 @@ p_map.add_layout(labels)
 
 # making the line chart
 p_line = figure(width=400, title="Predicted DV prevalence in percent of women", sizing_mode="stretch_height")
-p_line.line('year', 'lowWarming', source=line_src, color="#355C7D", line_width=3, legend_label="Low")
-p_line.line('year', 'mediumWarming', source=line_src, color="#F8B195", line_width=3, legend_label="Med")
-p_line.line('year', 'highWarming', source=line_src, color="#F67280", line_width=3, legend_label="High")
+p_line.line('year', 'lowWarming', source=lineplot_Data, color="#355C7D", line_width=3, legend_label="Low")
+p_line.line('year', 'mediumWarming', source=lineplot_Data, color="#F8B195", line_width=3, legend_label="Med")
+p_line.line('year', 'highWarming', source=lineplot_Data, color="#F67280", line_width=3, legend_label="High")
 p_line.legend.location = "top_left"
 # fixed x and y axes for country comparability
 p_line.y_range.start = 5
@@ -379,7 +374,7 @@ def fillPlotsWithData():
         med_vals.append(predicted_dv["Med"][yr][country_abb])
         high_vals.append(predicted_dv["High"][yr][country_abb])
 
-    line_src.data = {
+    lineplot_Data.data = {
         "year": years,
         "lowWarming": low_vals,
         "mediumWarming": med_vals,
@@ -393,15 +388,15 @@ def fillPlotsWithData():
     # (so the larger the difference to 2015, the more added heating)
     heating_visual = (y - 2015) / (2100 - 2015) #2100 is my max year
     # these store the coordinates of the countries I have selected right now
-    sel_x, sel_y, sel_size = 0, 0, 0
+    SelectedCountryx, SelectedCountry_y, SelectedCountry_size = 0, 0, 0
 
     # this loops over all countries on the map
     # so I get the index and the abbreviation
-    for i, code in enumerate(map_codes):
+    for i, code in enumerate(mapISOs):
         # COLOR based on dv:
         # then I go to that country and get the heatwave share for that year from your scenario dataframe
         # from my csv
-        base_temp = country_temp_norm.get(code, 0.5) #0.5 is just gonna be the safety middle filler value
+        base_temp = normalised_country_temps.get(code, 0.5) #0.5 is just gonna be the safety middle filler value
         # then I raise it to a power to amplify the differences
         gamma = 1.6
         color_value = base_temp ** gamma
@@ -421,59 +416,59 @@ def fillPlotsWithData():
         # now update the coordinates and code for the country!
         # this saves the selected country info for later use (drawing the outline, calculating things, etc.)
         if code == country_abb:
-            sel_x, sel_y, sel_size = map_x[i], map_y[i], bubble_size
+            SelectedCountryx, SelectedCountry_y, SelectedCountry_size = xCoords[i], yCoords[i], bubble_size
 
     # Now I change the map!
     # I changed the colours to new colours, sizes to new sizes, and now I update
     # and then the library uses this dataset instead for the drawing! I think...
     mapWithCoordinatesEtc.data = {
-    'x': map_x,
-    'y': map_y,
-    'code': map_codes,
-    'names': map_names,
+    'x': xCoords,
+    'y': yCoords,
+    'code': mapISOs,
+    'names': mapFullNames,
     'color_val': new_colors,
     'size': new_sizes
     }
-    selectedCountry.data = {'x': [sel_x], 'y': [sel_y], 'size': [sel_size + 4]}
+    selectedCountry.data = {'x': [SelectedCountryx], 'y': [SelectedCountry_y], 'size': [SelectedCountry_size + 4]}
 
     # 3. How many women experience DV?
     # this variable gets the predicted dv for the present year and country
     # and then gets the difference between that and the starting value
 
-    diff_in_dv = predicted_dv["High"][y][country_abb] - country_dv[country_abb]
-    diff_in_dv_low = predicted_dv["Low"][y][country_abb] - country_dv[country_abb]
+    High_Scenario_DVDiff = predicted_dv["High"][y][country_abb] - country_dv[country_abb]
+    Low_Scenario_DVDiff = predicted_dv["Low"][y][country_abb] - country_dv[country_abb]
 
     # then it gets the total population
-    total_pop = country_pop.get(country_abb, 0)
+    populationTotal = country_pop.get(country_abb, 0)
 
     # and divides it by 2, to get only the female population
-    female_pop = total_pop / 2
+    fem_pop = populationTotal / 2
 
     # then I multiply the predicted difference in dv by the total female population
     # (btw, this assumes population stays constant, so real numbers are probbaly worse...
     # populations grow)
-    additional_women_country = int((diff_in_dv / 100) * female_pop)
-    additional_women_country_low = int((diff_in_dv_low / 100) * female_pop)
+    additional_DV_high = int((High_Scenario_DVDiff / 100) * fem_pop)
+    additional_DV_low = int((Low_Scenario_DVDiff / 100) * fem_pop)
 
     # total affected women in that country (NOT just increase)
-    total_women_country = int((predicted_dv["High"][y][country_abb] / 100) * female_pop)
-    total_women_country_low = int((predicted_dv["Low"][y][country_abb] / 100) * female_pop)
+    total_DV_high = int((predicted_dv["High"][y][country_abb] / 100) * fem_pop)
+    total_DV_low = int((predicted_dv["Low"][y][country_abb] / 100) * fem_pop)
 
     # also get the difference, for impact etc.
-    difference_total_women = total_women_country - total_women_country_low
+    total_DV_diff = total_DV_high - total_DV_low
 
     txt.text = (
         f"<b>{country_name} Year: ({y}):</b><br>"
-        f"Increase in DV compared to baseline (High): +{diff_in_dv:.2f} percentage points.<br>"
-        f"Increase in DV compared to baseline (Low): +{diff_in_dv_low:.2f} percentage points.<br><br>"
+        f"Increase in DV compared to baseline (High): +{High_Scenario_DVDiff:.2f} percentage points.<br>"
+        f"Increase in DV compared to baseline (Low): +{Low_Scenario_DVDiff:.2f} percentage points.<br><br>"
 
-        f"Total affected (High): <b>{total_women_country:,}</b> women.<br>"
-        f"Total affected (Low): <b>{total_women_country_low:,}</b> women.<br><br>"
+        f"Total affected (High): <b>{total_DV_high:,}</b> women.<br>"
+        f"Total affected (Low): <b>{total_DV_low:,}</b> women.<br><br>"
 
-        f"Additional affected (High): <b>{additional_women_country:,}</b> women.<br>"
-        f"Additional affected (Low): <b>{additional_women_country_low:,}</b> women.<br>"
+        f"Additional affected (High): <b>{additional_DV_high:,}</b> women.<br>"
+        f"Additional affected (Low): <b>{additional_DV_low:,}</b> women.<br>"
 
-        f"So, between the low and the high temperature increase scenario, <b>~{difference_total_women}</b> more women "
+        f"So, between the low and the high temperature increase scenario, <b>~{total_DV_diff}</b> more women "
         f"experience domestic violence in {y} in {country_name} than in 2015."
     )
 
@@ -484,12 +479,12 @@ def fillPlotsWithData():
 # and here: https://docs.bokeh.org/en/3.0.0/docs/user_guide/interaction/python_callbacks.html
 # this confused me, but I think it just updates 'sel', the selected country,
 # to the name of that country when tapped
-def on_tap(attr, old, new):
+def UserClickedSomething(attr, old, new):
     if new:
         index = new[0]
         sel.value = mapWithCoordinatesEtc.data['names'][index]
 
-mapWithCoordinatesEtc.selected.on_change('indices', on_tap)
+mapWithCoordinatesEtc.selected.on_change('indices', UserClickedSomething)
 # this changes the selected country --> from dropdown selector
 sel.on_change('value', lambda a,o,n: fillPlotsWithData())
 # this the selected year --> from slider (sld)
