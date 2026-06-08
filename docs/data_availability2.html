@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Availability in LivWell</title>
+    <link rel="stylesheet" href="PIKstyle.css">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+
+<body>
+  <div class="topnav">
+
+    <div class="topnav-title">
+        Living Well? A Global Data Analysis of Heat and Domestic Violence
+    </div>
+
+    <div class="topnav-links">
+        <a href="index.html">Main</a>
+        <a href="phase1_main.html">Phase 1</a>
+        <a href="data_availability2.html">Data Availability</a>
+        <a href="analysis2.html">Analysis</a>
+    </div>
+
+</div>
+
+
+
+<h1>Region-Level Data Availability</h1>
+<div class="livwell_quote">
+  Inspecting available data for an analysis that uses heat and dv per region per year:
+</div>
+
+<hr>
+<h2>Checking how many years I have available per REGION:</h2>
+
+
+<div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
+  <!-- PLOT 1 -->
+  <div class="box" style="flex:1; min-width:320px;">
+
+    <h3>DV observations per region</h3>
+    <img src="phase2_plots/plot1_DV_observations_per_region.png"
+         style="width:100%; border-radius:8px;">
+    <p>
+      Number of DV observations per region, ranked from highest to lowest.
+    </p>
+
+  </div>
+
+
+
+  <!-- PLOT 2 -->
+
+  <div class="box" style="flex:1; min-width:320px;">
+    <h3>And in which years do I have how much data?</h3>
+    <img src="phase2_plots/plot2_years_per_region_distribution.png"
+         style="width:100%; border-radius:8px;">
+    <p>
+      Distribution of how many survey years each region appears in.
+    </p>
+  </div>
+
+
+  <!-- PLOT 3 -->
+
+  <div class="box" style="flex:1; min-width:320px;">
+    <h3>Region coverage over time</h3>
+
+    <img src="phase2_plots/plot4_regions_per_year.png"
+         style="width:100%; border-radius:8px;">
+    <p>
+      Number of regions observed per year.
+    </p>
+  </div>
+
+</div>
+<hr>
+
+
+<h2>Most important statistics:</h2>
+
+
+<div class="box">
+
+<pre>
+================================================
+YEARS PER REGION
+================================================
+count    350.000000
+mean       2.288571
+std        1.726130
+min        1.000000
+25%        1.000000
+50%        2.000000
+75%        3.000000
+max       11.000000
+Name: year, dtype: float64
+</pre>
+
+<pre>
+20 regions with FEWEST years:
+....
+Sikkim                                 1
+Kerala                                 1
+Khomas                                 1
+Khulna                                 1
+Kotayk                                 1
+Shirak                                 1
+Kunene                                 1
+La Paz                                 1
+</pre>
+
+<pre>
+20 regions with MOST years:
+region_name_harmonized
+Central          11
+Moquegua          7
+Puno              7
+Nord-Ouest        7
+Ica               7
+Huanuco           7
+Huancavelica      7
+...
+</pre>
+
+
+
+<pre>
+================================================
+Important numbers
+================================================
+Individual observations available: 809
+Unique regions: 350
+Unique region-years: 801
+Mean years per region: 2.29
+Median years per region: 2.00
+
+Regions with more than 4 years, and nr of observations:
+30 regions, 209 region-year obs
+
+More than 5 years, and nr of observations:
+ 28 regions, 199 region-year obs
+
+7 or more years, and nr of observations:
+27 regions, 193 region-year obs
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Filtering for Regions with ≥ 3 Years</h2>
+
+<div class="livwell_quote">
+  To meaningfully estimate within-region changes over time, a minimum number of repeated observations per region is required.
+  With only 1–2 years per region, any estimated slope would be unstable or entirely driven by noise.
+  Therefore, the analysis focuses on regions with at least 3 survey years, which allows for minimal but interpretable temporal variation.
+</div>
+
+<div class="box">
+
+<h3>Filtered Sample (≥ 3 years per region)</h3>
+
+<pre>
+====================================
+FILTERED SAMPLE (≥3 YEARS)
+====================================
+Regions: 120
+Observations/Region-years: 464
+Mean years per region: 3.87
+Median years per region: 3.00
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Countries in Final Analysis Sample (≥ 3-year regions only)</h2>
+
+<div class="livwell_quote">
+  I decided to filter for regions with ≥3-years available.
+  This was to get a balance between having SOME ability to estimate a slope,
+  but also not ending up with ~20 regions from around 1 country.
+</div>
+
+<div class="box">
+
+<pre>
+Number of countries: 14
+
+Cameroon, Colombia, Haiti, Jordan, Cambodia, Mali, Malawi,
+Nigeria, Peru, Philippines, Senegal, Uganda, Zambia, Zimbabwe
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Country-Level Data Availability (after filtering for regions with 3+ years)</h2>
+<div class="box">
+<pre>
+   country  n_obs
+      PER    162
+      KHM     54
+      PHL     51
+      HTI     36
+      ZMB     24
+      COL     23
+      ZWE     21
+      CMR     18
+      NGA     18
+      MLI     15
+      SEN     12
+      UGA     12
+      JOR      9
+      MWI      9
+</pre>
+</div>
+
+<hr>
+
+<h2>Geographical Distribution of Data Availability</h2>
+
+<div class="livwell_quote">
+  This map shows how many DV observations are available per country after filtering for regions with at least 3 survey years.
+  This is to show that I AM excluding a lot of countries with this filter, and I will
+  need to mention that if I ever report these results anywhere.
+</div>
+
+<div class="box">
+  <h3>Country-level DV observation density (filtered sample)</h3>
+  <img src="phase2_plots/country_data_availability_map.png"
+       style="width:100%; border-radius:8px;">
+  <p>
+    Countries in darker green have more DV observations.
+    Grey countries are not included after applying the ≥3-year region filter.
+  </p>
+
+</div>
+
+<hr>
+
+<div class="box">
+  <a href="index.html">Back to Main</a>
+</div>
+
+
+
+</body>
+
+</html>

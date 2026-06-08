@@ -35,7 +35,7 @@ and interpretations on.
 
 ---
 
-## The Three Steps
+## The Three Steps - Three files I want to ask you to look at
 
 # Step 1 - Understanding the Data (`understanding_livWell.py`)
 Loads the LivWell dataset (https://www.pik-potsdam.de/en/output/projects/all/579), selects the key variables (DV prevalence, heat anomalies, rainfall, country, year, region), and cleans it for analysis.
@@ -72,8 +72,7 @@ scripts, partly outdated.
 # Data Sources
 
 - LivWell — Wellbeing and livelihoods data for women in low- and middle-income countries.
-
-- IPCC AR6 / CMIP6 — Climate projections under SSP1-2.6, SSP3-7.0, and SSP5-8.5 scenarios (`tx35ba` variable: months exceeding 35°C).
+- IPCC AR6 / CMIP6 — Climate projections under SSP1-2.6, SSP3-7.0, and SSP5-8.5 scenarios (`tx35ba` variable: months exceeding 35C).
 - World Bank populations — Global populations from 2024 for estimating numbers of affected women.
 
 ---

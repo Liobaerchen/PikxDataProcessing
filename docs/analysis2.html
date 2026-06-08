@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Understanding LivWell</title>
+    <link rel="stylesheet" href="PIKstyle.css">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+</head>
+
+
+<body>
+  <div class="topnav">
+
+    <div class="topnav-title">
+        Living Well? A Global Data Analysis of Heat and Domestic Violence
+    </div>
+
+    <div class="topnav-links">
+        <a href="index.html">Main</a>
+        <a href="phase1_main.html">Phase 1</a>
+        <a href="data_availability2.html">Data Availability</a>
+        <a href="analysis2.html">Analysis</a>
+    </div>
+
+</div>
+
+<h1>Primary Analysis</h1>
+
+<p>
+Assumption checks and results for Model 4
+</p>
+<ul style="display: inline-block; text-align: left;">
+  <li>Assumption checks for model 4</li>
+  <li>Results and interpretation for model 4</li>
+</ul>
+
+
+<hr>
+
+<div style="text-align: center; margin-top: 40px;">
+    <p style="font-style: italic; font-size: 20px; font-family: 'Lora', serif; color: var(--c3);">
+        Is extreme heat related to increased violence against women?
+    </p>
+    <p style="font-weight: 300; margin-top: 10px; color: var(--muted);">
+        Stehen Hitzeextreme mit Gewalt gegen Frauen in Zusammenhang?
+    </p>
+</div>
+
+<div style="display:flex; gap:20px; max-width:860px; margin:40px auto;">
+
+  <div class="box" style="flex:1;">
+    <h2>Model 4</h2>
+    <div class="equation">DV<sub>rct</sub> = β · Heat<sub>rct</sub> + γ · Rain<sub>rct</sub> + α<sub>r</sub> + τ<sub>t</sub> + ε<sub>rct</sub></div>
+    <ul>
+      <li><b>Fixed Effects:</b> Region (region_id) + year (NOTE: this is the important difference to model 2!)</li>
+      <li><b>Controls:</b> Rainfall, clustered SEs</li>
+      <li><b>Variation:</b> This time, it's within-region, over time</li>
+      <li><b>Question:</b> Are hotter years within a specific region more violent?</li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+  <h2>Assumption Checks for Model 4</h2>
+<div id="slideshow">  <button id="prev" onclick="go(-1)">&#8592;</button>
+    <button id="next" onclick="go(1)">&#8594;</button>
+    <div class="item active">
+        <div class="slide-content">
+            <h3> Linearity and Heteroscedasticity </h3>
+            <div class="slide-body">
+                <div class="images">
+                    <img src="phase2_plots/residualsVsFitted2.jpg">
+                    <img src="phase2_plots/heatVsDV2.jpg">
+                </div>
+                <div class="text">
+                  <div class="box">
+                    <h3>AIC linear vs. quadratic</h3>
+                    <p>
+                      <ul>
+                        <li>Base model AIC: 2723.5225371436723,</li>
+                        <li>Square model AIC: 2724.06070430192</li>
+                      </ul>
+                      this is good: when in doubt, assume the simpler model,
+                      and also, base model does a bit better than square... YAY
+                    </p>
+                  </div>
+                  <div class="box">
+                    <h3>Notes</h3>
+                    <h4>Plot 1</h4>
+                    <ul>
+                      <li>No obvious linear relationship is visible, but also no e.g. exponential relationship.</li>
+                      <li>Mean of the residuals is roughly around 0 across the range, so linearity looks okay; there's no obvious curve.</li>
+                      <li>The spread of residuals is wider in the middle.
+                        That funnel-ish shape suggests some heteroscedasticity.</li>
+                      <li><strong>NOTE: Looks like heteroscedasticity! but clustered SEs handle that! MENTION THIS alongside the plot!</strong></li>
+                    </ul>
+                    <h4>Plot 2</h4>
+                    <ul>
+                      <li>Heat only takes a few distinct values,
+                        which makes sense because it's a share of 12 months,
+                        so it can only be multiples of 1/12.
+                        This is an outcome of the variable construction, not really a problem.
+                        But it means heat is almost ordinal, very crude, which should maybe be mentioned later.</li>
+                      <li>There is no immediately visible linear trend.
+                        This could mean one of several things:
+                        <ul>
+                          <li>There is no linear relationship</li>
+                          <li>The relationship is obscured by the effects that I will control for</li>
+                          <li>The relationship is very weak (probably true)</li>
+                          <li>So, this plot isn't alarming. Linearity could be given.
+                          This result is actually kind of expected; without fixed
+                          effects, I am comparing different countries and different years,
+                          probably obscured by many other variables that I am not controlling for.</li>
+                        </ul>
+                      </li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="item">
+        <div class="slide-content">
+            <h3> Normality of Residuals </h3>
+            <div class="slide-body">
+                <div class="images">
+                    <img src="phase2_plots/qq2.jpg">
+                    <img src="phase2_plots/residualHist2.jpg">
+                </div>
+                <div class="text">
+                    <div class="box">
+                        <h3>Notes</h3>
+                        <h4>Plot 1</h4>
+                        <ul>
+                          <li>it's right-skewed, with a fat heavy thicc right tail...</li>
+                          <li>but my sample is big enough (464)</li>
+                          <li>and I check outliers to see what's happening... so all good</li>
+                        </ul>
+                        <h4>Plot 2</h4>
+                        <ul>
+                          <li>Residuals look relatively normal. Centered at 0. Good.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="item">
+        <div class="slide-content">
+            <h3> Multicollinearity </h3>
+            <div class="slide-body">
+                <div class="box">
+                    <h3>VIF for heat: 1.015</h3>
+                    <p>Chosen threshold to diagnose Multicollinearity: 5 (Kim, 2019).<br>
+                    Thus: Multicollinearity does not seem present! Good.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="item">
+        <div class="slide-content">
+          <h3> Outliers / Influential Observations </h3>
+            <div class="slide-body">
+              <div class="text">
+                  <div class="box">
+                      <h3>Counts</h3>
+                      <ul>
+                          <li><b>Cook's distance > 0.0086 (4/n):</b> 64 observations</li>
+                          <li><b>Standardised residual > 3:</b> Flagged observations include KHM_10 and ZMB_4</li>
+                          <li><b>Total (unique) outliers:</b> 64 observations</li>
+                      </ul>
+                  </div>
+                  <div class="box">
+                      <h3>Which countries?</h3>
+                      <p>Flagged observations come from regions with high leverage or extreme DV spikes (e.g., Cambodia, Colombia, Zimbabwe, Cameroon, Zambia):</p>
+                      <ul>
+                          <li><b>CMR</b> (Cameroon)</li>
+                          <li><b>COL</b> (Colombia)</li>
+                          <li><b>KHM</b> (Cambodia)</li>
+                          <li><b>ZWE</b> (Zimbabwe)</li>
+                          <li><b>ZMB</b> (Zambia)</li>
+                      </ul>
+                  </div>
+                  <div class="box">
+                      <h3>Notes</h3>
+                      <p>For Cook's distance, a threshold of 4/n (approx 0.0086 for n=464) was used to flag
+                        observations as outliers (Hair et al., 1998)</p>
+                      <ul>
+                        <li>Might rerun model later without these 64 observations as a robustness check.</li>
+                        <li>No observations will be removed from the main model without theoretical justification.</li>
+                      </ul>
+                  </div>
+            </div>
+        </div>
+    </div>
+ </div>
+
+ <div class="item">
+        <div class="slide-content">
+            <h3> Skew of DV </h3>
+            <div class="slide-body">
+                <div class="images">
+                    <img src="phase2_plots/dvHist2.jpg">
+                </div>
+                <div class="text">
+                    <div class="box">
+                        <h3>Notes</h3>
+                        <ul>
+                            <li>The DV is right-skewed (which is expected for this variable).</li>
+                            <li>However, OLS does not assume the DV itself is normally distributed, only that the residuals are, and that assumption relaxes with large n due to the CLT.</li>
+                            <li>The residuals were already checked and looked okay.</li>
+                            <li>Skew could be an issue if it leads to predictions below 0, which would be nonsensical. But most values are between 5–30%, so out-of-bounds predictions are unlikely.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let i = 0;
+    let items = document.querySelectorAll(".item");
+
+    function go(dir) {
+        items[i].classList.remove("active");
+        i = (i + dir + items.length) % items.length;
+        items[i].classList.add("active");
+    }
+
+    document.body.onclick = function () {
+        if (event.target.closest("#prev, #next")) return;
+        items[i].classList.remove("active");
+        i = (i + 1) % items.length;
+        items[i].classList.add("active");
+    };
+</script>
+
+<hr>
+
+<h2>Results: Model 4</h2>
+
+<div class="box">
+  <h3>MODEL:</h3>
+
+  <pre style="
+    background: #f6f6f6;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: left;
+  ">
+    OLS Regression Results
+    ------------------------------------------------------------------------------
+    Dep. Variable: dv    R-squared: 0.836
+    Adj. R-squared: 0.767
+    F-statistic: 5.102e+04
+    Prob (F-statistic): 2.23e-28
+
+    Observations: 464
+    Df Model: 137
+    Covariance Type: cluster
+    ------------------------------------------------------------------------------
+    heat coefficient: 10.31 (SE: 4.31, p = 0.017) --> SIGNIFICANT!
+    rain coefficient: 1.41 (p = 0.448)
+  </pre>
+</div>
+
+<div style="max-width: 1100px; margin: 0 auto; padding: 0 20px;">
+
+<div style="display:flex; gap:20px; flex-wrap:wrap; align-items:stretch;">
+
+  <div class="box" style="flex:1; min-width:260px;">
+    <h3>Summary</h3>
+    <ul>
+      <li><b>R²:</b> 0.836</li>
+      <li><b>Adj. R²:</b> 0.767</li>
+      <li><b>F-statistic:</b> 5.102e+04</li>
+      <li><b>p (F):</b> 2.23e-28 (this is NOT the important significance)</li>
+    </ul>
+  </div>
+
+  <div class="box" style="flex:2; min-width:300px; border-top-color: var(--c2);">
+    <h3>SIGNIFICANCE INCOMING:</h3>
+
+    <p>
+      Heat coefficient: <b>10.31</b><br>
+      SE: 4.31<br>
+      <strong>p = 0.017</strong>
+    </p>
+
+    <p>
+      Since both are measured in percent, a 1 increase in heat and DV doesn't make sense.
+    </p>
+
+    <p>
+      BUT:<br>
+      A 10 percentage-point increase in extreme-heat-month count
+      is associated with a roughly 1 percentage-point change</b>
+      in DV prevalence (controlling for rainfall, region, and year fixed effects etc. etc.).
+    </p>
+
+    <p>
+      This seems small, but it is meaningful.
+    </p>
+  </div>
+
+  <div class="box" style="flex:1.2; min-width:280px;">
+    <h3>Interpretation (population perspective)</h3>
+
+    <p>
+      This seems small, but it is meaningful if you consider:<br>
+      Even if the increase in risk for each person is tiny,
+      multiplying that small increase over a large population
+      can produce a huge number of additional cases overall.
+    </p>
+
+    <p>
+      Imagine:
+    </p>
+
+    <ul>
+      <li>1,000,000 women experience DV in these countries</li>
+      <li>1.031% change -> ~10,310 cases</li> </ul>
+
+    <p>
+      The point is explained here:
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2560511/">The Axiom of Rose (Malik, 2006)</a>
+    </p>
+
+    <p><b>NOTE:</b> this would be great to mention and maybe visualise</p>
+  </div>
+
+</div>
+
+</div>
+
+
+</div>
+
+<div class="box">
+  <a href = 'index.html'>Back to Main</a>
+</div>
+
+</body>
+</html>

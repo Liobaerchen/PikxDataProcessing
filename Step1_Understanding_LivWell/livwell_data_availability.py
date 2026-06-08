@@ -273,3 +273,290 @@ so I can’t reliably see whether changes in heat are followed by changes in DV 
 Mathematically, I predict using beta*heat, and heat does NOT vary within a region.
 It's constant for everyone.
 """
+
+
+##############################################################################
+##############################################################################
+"""
+UPDATE after meeting Leonie!
+"""
+##############################################################################
+##############################################################################
+
+# Can I do sth like the migration paper did?
+#
+# What I need is enough region-year observations,
+# to get within-region climate effects
+# and have enough variation despite year, country, region FEs
+#
+# Problem
+# Climate varies at the REGION-YEAR level.
+#
+# So:
+# 10,000 women in one region-year still only provide
+# ONE climate observation.
+#
+# The effective sample size is the number of unique
+# REGION-YEARS, not the number of individuals.
+
+
+# ===============================
+# FIX: CORE DATA OBJECTS FOR SECTION 2
+# ===============================
+
+dv_col = "DV_phys_12m_p"
+
+# DV-only dataset (keep only non-missing DV values)
+dv_data = livwell_all[livwell_all[dv_col].notna()].copy()
+
+# region-year structure (needed for panel depth + plots)
+region_years = (
+    dv_data
+    .groupby(["region_name_harmonized", "year"])
+    .size()
+    .reset_index(name="n_obs")
+)
+
+# for saving plots:
+import os
+phase2_path = "/Users/lioba/Desktop/PIK/PikxDataProcessing/docs/phase2_plots"
+os.makedirs(phase2_path, exist_ok=True)
+
+###
+# step 1: Panel depth
+#
+# How many years does each region appear?
+#
+# This is a bit like the migration paper's
+# "years per migration corridor".
+
+years_per_region = (
+    region_years
+    .groupby("region_name_harmonized")
+    ["year"]
+    .nunique()
+)
+
+print("\n================================================")
+print("YEARS PER REGION")
+print("================================================")
+
+print(years_per_region.describe())
+
+print("\n20 regions with FEWEST years:")
+print(years_per_region.sort_values().head(20))
+
+print("\n20 regions with MOST years:")
+print(
+    years_per_region
+    .sort_values(ascending=False)
+    .head(20)
+)
+
+
+# PLOT 1
+#
+# How much DV data exists per region?
+
+region_counts = (
+    dv_data
+    .groupby("region_name_harmonized")
+    ["DV_phys_12m_p"]
+    .count()
+    .sort_values(ascending=False)
+)
+
+plt.figure(figsize=(10,5))
+
+plt.bar(
+    range(len(region_counts)),
+    region_counts.values,
+    color=brighter_purple
+)
+
+plt.title(
+    "DV observations per region"
+)
+
+plt.xlabel(
+    "Regions (ranked by amount of DV data)"
+)
+
+plt.ylabel(
+    "Number of observations"
+)
+
+plt.tight_layout()
+
+plt.savefig(os.path.join(phase2_path, "plot1_DV_observations_per_region.png"))
+
+plt.show()
+
+
+# PLOT 2
+#
+# PANEL DEPTH DISTRIBUTION
+#
+# Shows:
+# How many survey years each region appears in.
+#
+# Interpretation:
+#
+# If most regions appear only once:
+# -> weak panel
+#
+# If most regions appear 4-8 times:
+# -> betteeeer
+#
+# SAVE THIS! V IMPORTANT!
+
+plt.figure(figsize=(8,5))
+
+plt.hist(
+    years_per_region,
+    bins=range(
+        1,
+        int(years_per_region.max()) + 2
+    ),
+    color=blue,
+    edgecolor=darker_purple
+)
+
+plt.axvline(
+    years_per_region.mean(),
+    color=pink,
+    linestyle='--',
+    label=f"Mean = {years_per_region.mean():.2f}"
+)
+
+plt.title(
+    "How many years does each region appear?"
+)
+
+plt.xlabel(
+    "Unique survey years per region"
+)
+
+plt.ylabel(
+    "Number of regions"
+)
+
+plt.legend()
+
+plt.tight_layout()
+
+plt.savefig(os.path.join(phase2_path, "plot2_years_per_region_distribution.png"))
+
+plt.show()
+
+
+
+# PLOT 3
+#
+# REGION-YEAR COVERAGE THROUGH TIME
+#
+# Shows:
+# How many regions are observed in each year.
+#
+# Interpretation:
+
+# If only a few years contain most observations,
+# identification becomes harder.
+#
+# Ideally:
+# broad temporal coverage (let's betttt if that's the case hah)
+
+regions_per_year = (
+    region_years
+    .groupby("year")
+    .size()
+)
+
+plt.figure(figsize=(10,5))
+
+plt.plot(
+    regions_per_year.index,
+    regions_per_year.values,
+    marker='o'
+)
+
+plt.title(
+    "Number of regions observed per year"
+)
+
+plt.xlabel(
+    "Year"
+)
+
+plt.ylabel(
+    "Regions with DV data"
+)
+
+plt.tight_layout()
+
+plt.savefig(os.path.join(phase2_path, "plot4_regions_per_year.png"))
+
+plt.show()
+
+###
+# getting availabiliy of regions with more than 4,5,7 years:
+##
+thresholds = [4, 5, 7]
+
+print("\nREGION COVERAGE BY PANEL DEPTH")
+
+for t in thresholds:
+    regions_t = years_per_region[years_per_region > t].index
+
+    n_regions = len(regions_t)
+
+    n_region_year_obs = region_years[
+        region_years["region_name_harmonized"].isin(regions_t)
+    ].shape[0]
+
+    print(f"\n> {t} years")
+    print("regions:", n_regions)
+    print("region-year obs:", n_region_year_obs)
+
+regions_7plus = years_per_region[years_per_region >= 7].index
+
+print("\n>= 7 years")
+print("regions:", len(regions_7plus))
+print(
+    "region-year obs:",
+    region_years[
+        region_years["region_name_harmonized"].isin(regions_7plus)
+    ].shape[0]
+)
+
+
+# FINAL SUMMARY
+
+print("\n================================================")
+print("KEY NUMBERS FOR CLIMATE IDENTIFICATION")
+print("================================================")
+
+print(
+    f"Individual observations: "
+    f"{len(dv_data):,}"
+)
+
+print(
+    f"Unique regions: "
+    f"{region_years['region_name_harmonized'].nunique():,}"
+)
+
+print(
+    f"Unique region-years: "
+    f"{len(region_years):,}"
+)
+
+print(
+    f"Mean years per region: "
+    f"{years_per_region.mean():.2f}"
+)
+
+print(
+    f"Median years per region: "
+    f"{years_per_region.median():.2f}"
+)
