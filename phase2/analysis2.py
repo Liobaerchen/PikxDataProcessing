@@ -32,16 +32,11 @@ print(livwell_all.columns)
 # so filter:
 
 
-region_years = (
-    livwell_all
-    .groupby(["region_id", "year"])
-    .size()
-    .reset_index(name="n_obs"))
-
 years_per_region = (
-    region_years
+    livwell_all
     .groupby("region_id")["year"]
-    .nunique())
+    .nunique()
+)
 
 print("\n=== YEARS PER REGION SUMMARY ===")
 print(years_per_region.describe())
@@ -49,7 +44,11 @@ print(years_per_region.describe())
 # now filter:
 
 min_years = 3 # can be changed here
-valid_regions = years_per_region[years_per_region >= min_years].index
+filterr = (years_per_region >= min_years)
+valid_regions = years_per_region[filterr].index
+
+print("valid regions:")
+print(valid_regions)
 
 livwell_3plus = livwell_all[
     livwell_all["region_id"].isin(valid_regions)
@@ -65,10 +64,9 @@ region_years_3plus = (
 
 # small summary:
 
-print("\n=== FILTERED SAMPLE (≥3 YEARS) ===")
+print("\n###FILTERED SAMPLE (≥3 YEARS)###")
 print("Regions:", livwell_3plus["region_id"].nunique())
-print("Observations:", len(livwell_3plus))
-print("Region-years:", len(region_years_3plus))
+print("Observations/region-years:", len(livwell_3plus))
 
 print("Mean years/region:", years_per_region[valid_regions].mean())
 print("Median years/region:", years_per_region[valid_regions].median())
@@ -82,9 +80,9 @@ print("Median years/region:", years_per_region[valid_regions].median())
 # get unique country list
 countries_left = sorted(livwell_3plus["country"].unique())
 
-print("\n====================================")
+print("\n#################################")
 print("COUNTRIES IN FINAL ANALYSIS SAMPLE")
-print("====================================")
+print("###################################")
 
 print(f"Number of countries: {len(countries_left)}\n")
 
@@ -197,6 +195,20 @@ the_holy_grail = smf.ols("dv ~ heat + rain + C(region_id) + C(year)", data=livwe
     cov_type="cluster", cov_kwds={"groups": livwell_3plus["country"]}
 )
 
+# check if heat actually varies still:
+print('############# heat variance! ################')
+print(livwell_3plus.groupby("region_id")["heat"].std().describe())
+# let Leonie know it's quite small!
+# ############# heat variance! ################
+# count    120.000000
+# mean       0.067391
+# std        0.074298
+# min        0.000000
+# 25%        0.000000
+# 50%        0.048113
+# 75%        0.096225
+# max        0.336788
+
 # residuals vs. fitted
 plt.scatter(the_holy_grail.fittedvalues, the_holy_grail.resid, alpha=0.3, color=brighter_purple)
 plt.axhline(0, color=pink)
@@ -290,3 +302,7 @@ print('\n\n')
 print('\nSIGNIFICANCE INCOMING:\n\n')
 print(f"Heat coefficient: {the_holy_grail.params['heat']} (SE: {the_holy_grail.bse['heat']}, p = {the_holy_grail.pvalues['heat']})")
 print('\n\n')
+
+# save filtered csv for reanalysis with JASP (just to be sure)
+
+livwell_3plus.to_csv("threepluslivwell.csv")
