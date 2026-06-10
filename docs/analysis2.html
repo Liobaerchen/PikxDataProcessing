@@ -221,7 +221,6 @@ Assumption checks and results for Model 4
         </div>
     </div>
 
-
 <script>
     let i = 0;
     let items = document.querySelectorAll(".item");
@@ -241,6 +240,7 @@ Assumption checks and results for Model 4
 </script>
 
 <hr>
+
 
 <h2>Results: Model 4</h2>
 
@@ -416,8 +416,127 @@ max        0.336788
   </div>
 
 </div>
+<hr>
+<div class="box" style="
+    margin-top: 20px;
+">
+  <p><b>⚠ Assumption PROBLEMS that need further testing: ⚠</b></p>
 
+  <div class="box" style="
+      border-left: 6px solid #c97a00;
+      background: #fff7e6;
+      margin-top: 10px;
+  ">
+    <pre style="
+        background: #ffffff;
+        padding: 10px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 13px;
+    ">
+LINEARITY:
+- heat variable is very crude (looks discrete)
+- BUT I tested AIC and there is no clear visual evidence of weird residuals
 
+⚠ADDITIVITY⚠:
+- Is the heat effect independent of rainfall?
+- are there no interactions, no thresholds? E.g. does how urban a region is not
+INTERACT with heat effects? It probably DOES!
+
+I also have ⚠⚠HETEROSCEDASTICITY⚠⚠!
+-> SE UNSTABLE!!!!
+
+AND FAT TAILS
+
+And lots of influential observations (not in JASP though)
+
+And a Skewed DV
+    </pre>
+  </div>
+
+</div>
+
+<hr>
+
+<div>
+<h2> THUS: Avoiding Statistical Sins:</h2>
+<h3> (Thank you Andy Field)</h3>
+
+<ul>
+  <li>Additivity might be a real issue, but this is very fundamental and I am not
+  sure how to account for it (ask Leonie)</li>
+  <li>Clustered errors do partly address the heteroscedasticity</li>
+  <li>The estimates are not in danger because of the fat tails, heteroscedasticity,
+  outliers. BUT the SIGNIFICANCE is! The problem here is the standard errors!
+Hence, I will bootstrap.</li>
+<li>I will also trim outliers and check for robustness of my p-value and estimate</li>
+</ul>
+
+<div class="box">
+
+  <div class="box" style="margin-top: 15px;">
+    <h3>Bootstrap inference (at cluster! level)</h3>
+
+    <p>
+      I resampled regions 500 times (with original sample size).
+      I was not re-sampling the years and values indivdually!
+      I thoguht I needed this to keep the dependence structure,
+      but is that correct?
+    </p>
+
+    <ul>
+      <li><b>Bootstrap mean estimate:</b> ~10.28</li>
+      <li><b>Bootstrap standard error:</b> ~2.65</li>
+      <li><b>95% bootstrap CI:</b> [5.02, 15.90]</li>
+    </ul>
+
+    <p>
+      The bootstrap distribution of the heat coefficient was pretty much symmetric,
+      and centered close to the baseline estimate, so my SE and estimate seem quite
+      robust! Nice :)
+    </p>
+
+    <div style="text-align:center; margin-top: 10px;">
+      <img src="phase2_plots/bootstrap.png" style="max-width:100%; border-radius:10px;">
+    </div>
+  </div>
+
+  <div class="box" style="margin-top: 15px;">
+    <h3>Outlier sensitivity: 2% trimmed OLS</h3>
+
+    <p>
+      Checking robustness to my fat tails and many many outliers:
+      I trimmed the top and bottom 2% of DV values.
+    </p>
+
+    <ul>
+      <li><b>Trimmed coefficient (heat):</b> 8.86</li>
+      <li><b>Clustered SE:</b> 2.68</li>
+      <li><b>t-statistic:</b> 3.30</li>
+      <li><b>p-value:</b> 0.001</li>
+      <li><b>95% CI:</b> [3.60, 14.11]</li>
+    </ul>
+
+    <p>
+      The coefficient DID decrease! To roughly 0.8%; mention that!
+      Buuut it stayed positive, and statistically significant.
+      Isn't this just amazing
+    </p>
+  </div>
+
+  <div class="box" style="margin-top: 15px;">
+    <h3>Overall robustness conclusion</h3>
+
+    <p>
+      Across baseline, bootstrap, and trimmed specifications, the results are stable:
+      CELEBRATION
+    </p>
+  </div>
+</div>
+
+</div>
+
+<hr>
 </div>
 
 <div class="box">

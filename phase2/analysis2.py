@@ -12,6 +12,7 @@ from scipy.stats import binom
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 from statsmodels.stats.outliers_influence import OLSInfluence
 from math import comb
+import numpy as np
 
 # load csv again
 
@@ -192,7 +193,7 @@ colors = [orange, pink, brighter_purple, darker_purple, blue]
 # BUT I still cluster errors by country because errors within the same country
 # are likely correlated (shared culture, climate patterns, etc. etc.).
 the_holy_grail = smf.ols("dv ~ heat + rain + C(region_id) + C(year)", data=livwell_3plus).fit(
-    cov_type="cluster", cov_kwds={"groups": livwell_3plus["country"]}
+    cov_type="cluster", cov_kwds={"groups": livwell_3plus["region_id"]}
 )
 
 # check if heat actually varies still:
@@ -214,7 +215,7 @@ plt.scatter(the_holy_grail.fittedvalues, the_holy_grail.resid, alpha=0.3, color=
 plt.axhline(0, color=pink)
 plt.xlabel("Fitted values")
 plt.ylabel("Residuals")
-plt.title("Residuals vs. fitted (TWFE Model)")
+plt.title("Residuals vs. fitted")
 plt.savefig(os.path.join(save_plots_here, "residualsVsFitted2.jpg"))
 plt.show()
 plt.close()
@@ -232,7 +233,7 @@ plt.close()
 
 # AIC
 the_holy_grail_two_degree_poly_version = smf.ols("dv ~ heat + I(heat**2) + rain + C(region_id) + C(year)", data=livwell_3plus).fit(
-    cov_type="cluster", cov_kwds={"groups": livwell_3plus["country"]}
+    cov_type="cluster", cov_kwds={"groups": livwell_3plus["region_id"]}
 )
 print(f'\n\nBase model AIC: {the_holy_grail.aic},\n Square model AIC: {the_holy_grail_two_degree_poly_version.aic}.\n\n')
 # Base model AIC: 2723.5225371436723,
@@ -306,3 +307,130 @@ print('\n\n')
 # save filtered csv for reanalysis with JASP (just to be sure)
 
 livwell_3plus.to_csv("threepluslivwell.csv")
+
+################################################################################
+# Bootstrap to be safe...
+################################################################################
+reps = 500
+
+# store results
+booted_heat_betas = []
+
+#okay plan:
+# 1. randomly pick regions, WITH replacement (boot boot boot)
+# -- (re-sample observation per region, because obviously regions are dependent, but within regions,
+# -- I assume independence (so once I account for region, then within that region, independence)
+# 2. select the data from those regions
+# 3. run the regression on that region
+# 4. check the heat coefficient
+# 5. save it, at the end, calculate its variance (SE)
+
+# so it's like:
+# "What if I had observed different sets of countries,
+# each with their full time histories?""
+
+# commenting this out because it takes a long time to run
+
+regions = livwell_3plus["region_id"].unique()
+regioncount = len(regions)
+
+# this is to save the estimates for the heat coefficients
+# so I can later check the variance
+booted_heat_betas = []
+
+print("\nRunning simple cluster bootstrap...")
+
+for boot in range(reps):
+    # WITH REPLACEMENT
+    boot_regions = np.random.choice(regions, size=regioncount, replace=True)
+
+    # note: I am not re-sampling the years and values indivdually! I am re-sampling
+    # whole regions!
+    # I think I need this to keep the dependence structure, but ask Leonie!
+    sampled = []
+    for region in boot_regions:
+        mask = (livwell_3plus["region_id"] == region)
+        selected = livwell_3plus[mask]
+        sampled.append(selected)
+
+    sampled = pd.concat(sampled, ignore_index=True)
+    # fit the same model again
+    boot_model = smf.ols(
+        "dv ~ heat + rain + C(region_id) + C(year)",
+        data=sampled
+    ).fit(
+        cov_type="cluster",
+        cov_kwds={"groups": sampled["region_id"]}
+    )
+
+
+    booted_heat_betas.append(boot_model.params["heat"])
+
+booted_heat_betas = np.array(booted_heat_betas)
+
+
+print("\nBOOTSTRAP RESULTS (heat coefficient)")
+print("------------------------------------")
+print(f"Mean: {booted_heat_betas.mean():.4f}")
+print(f"Std (bootstrap SE): {booted_heat_betas.std():.4f}")
+print(f"95% CI: [{np.percentile(booted_heat_betas, 2.5):.4f}, "
+      f"{np.percentile(booted_heat_betas, 97.5):.4f}]")
+
+fig, ax = plt.subplots()
+ax.hist(booted_heat_betas, bins=30)
+ax.set_title("Bootstrap distribution of heat coefficient")
+fig.savefig(os.path.join(save_plots_here, "bootstrap.png"),
+            dpi=300, bbox_inches="tight")
+plt.show()
+plt.close(fig)
+
+print("Skew:", pd.Series(booted_heat_betas).skew())
+print("Min:", booted_heat_betas.min())
+print("Max:", booted_heat_betas.max())
+
+# BOOTSTRAP RESULTS (heat coefficient)
+# ------------------------------------
+# Mean: 10.2750
+# Std (bootstrap SE): 2.6544
+# 95% CI: [5.0176, 15.9027]
+# that is actually SMALLER than the one I got... so am I fine?
+
+# To account for fat tails and outliers, I will do MM-estimation in R!
+# see another file
+# it did not converge... so I will trim and check
+
+# ----------------------------
+# just trim 2%
+
+lower = livwell_3plus["dv"].quantile(0.02)
+upper = livwell_3plus["dv"].quantile(0.98)
+
+livwell_trimmed = livwell_3plus[
+    (livwell_3plus["dv"] >= lower) &
+    (livwell_3plus["dv"] <= upper)
+].copy()
+
+print("Original n:", len(livwell_3plus))
+print("Trimmed n:", len(livwell_trimmed))
+
+trimmed_model = smf.ols(
+    "dv ~ heat + rain + C(region_id) + C(year)",
+    data=livwell_trimmed
+).fit(
+    cov_type="cluster",
+    cov_kwds={"groups": livwell_trimmed["region_id"]}
+)
+
+print(trimmed_model.summary())
+
+print("\nHeat (original):", the_holy_grail.params["heat"])
+print("Heat (trimmed): ", trimmed_model.params["heat"])
+
+# Heat (original): 10.314538761526485
+# Heat (trimmed):  8.856016542846431
+
+# Estimate (heat): 8.86
+# Std. error: 2.68
+# t-statistic: 3.30
+# p-value: 0.001
+# 95% CI: [3.60, 14.11]
