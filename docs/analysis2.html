@@ -221,6 +221,7 @@ Assumption checks and results for Model 4
         </div>
     </div>
 
+
 <script>
     let i = 0;
     let items = document.querySelectorAll(".item");
@@ -242,6 +243,63 @@ Assumption checks and results for Model 4
 <hr>
 
 <h2>Results: Model 4</h2>
+
+<div class="box" style="
+    margin-top: 20px;
+">
+
+  <h3>Variable Definitions & Interpretation</h3>
+
+  <p><b>Heat:</b> Share of months in the past 12 months with a
+  positive temperature anomaly exceeding 2 standard deviations.</p>
+
+  <p><b>Domestic Violence (DV):</b> Women who experienced physical violence in the past 12 months (% of surveyed women).</p>
+
+  <p>
+    Heat is NOT a measure of “high temperature” in general,
+    but of <b>statistically unusual heat (standard deviations)</b>.
+    So, interpretation should be about exposure to <b>extreme heat anomalies</b>,
+    HEAT WAVES,
+    not average climate level.
+  </p>
+
+  <hr style="margin: 12px 0;">
+
+  <p><b>⚠ Within-region variation in heat: ⚠</b></p>
+
+  <div class="box" style="
+      border-left: 6px solid #c97a00;
+      background: #fff7e6;
+      margin-top: 10px;
+  ">
+    <pre style="
+        background: #ffffff;
+        padding: 10px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 13px;
+    ">
+count    120.000000
+mean       0.067391
+std        0.074298
+min        0.000000
+25%        0.000000
+50%        0.048113
+75%        0.096225
+max        0.336788
+    </pre>
+  </div>
+
+  <p>
+    Note: many regions show no within-region variation (25th percentile = 0),
+    meaning some regions do not contribute. Also, it may be questionable how much
+    I am analysing noise rather than actual effects. Future research: how strong
+    do heat effects have to be to make a difference? The relationship was significant
+    though, so an alternative explanation should exist to really question the
+    heat effect interpretation.
+  </p>
+
+</div>
 
 <div class="box">
   <h3>MODEL:</h3>
@@ -338,6 +396,24 @@ Assumption checks and results for Model 4
   </div>
 
 </div>
+
+</div>
+
+<h2>Tadaaaa:</h2>
+
+<div style="
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 24px;
+  background: #f7f7f7;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  font-family: 'Source Sans 3', sans-serif;
+">
+  <div style="text-align:center;">
+    <img src="phase2_plots/visualiser.png"
+         style="max-width:100%; height:auto; border-radius:10px;">
+  </div>
 
 </div>
 
