@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Understanding LivWell</title>
+
+    <link rel="stylesheet" href="PIKstyle.css">
+
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+
+<style>
+
+.moderator-wrapper{
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+
+.moderator-track{
+    display: flex;
+    transition: transform 0.5s ease;
+    width: 100%;
+}
+
+.moderator-slide{
+    min-width: 100%;
+    padding-right: 10px;
+}
+
+.slider-controls{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+    justify-content:center;
+}
+
+.slider-controls button{
+    padding:10px 18px;
+    border:none;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.fakeplot{
+    position: relative;
+    height: 320px;
+    background: #f5f5f5;
+    overflow:hidden;
+}
+
+.dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    position:absolute;
+    background:#7c5cff;
+}
+
+.line{
+    height:2px;
+    position:absolute;
+    background:#7c5cff;
+}
+
+.slide{
+    display:none;
+}
+
+.slide.active{
+    display:block;
+}
+
+.controls{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="topnav">
+
+    <div class="topnav-title">
+        Living Well? A Global Data Analysis of Heat and Domestic Violence
+    </div>
+
+    <div class="topnav-links">
+        <a href="index.html">Main</a>
+        <a href="phase1_main.html">Phase 1</a>
+        <a href="data_availability2.html">Data Availability</a>
+        <a href="analysis2.html">Analysis</a>
+        <a href="moderators.html">Exploring Moderators</a>
+    </div>
+
+</div>
+
+<h1>Exploring Moderators</h1>
+
+<p>
+Exploring empowerment, urban heat island effects, wealth, cooling (electricity),
+and age gaps as moderators.
+</p>
+
+<ul style="display: inline-block; text-align: left;">
+  <li>Assumption checks for moderators</li>
+  <li>Results and interpretation for moderators</li>
+</ul>
+
+<hr>
+
+<!-- little recap section -->
+
+<section class="section" id="theory">
+
+<h2>Reminder: Research Question</h2>
+
+<div class="grid">
+
+<div class="box">
+    <h3>Main Question</h3>
+
+    <p>
+        Are hotter-than-usual years within a region associated
+        with increased prevalence of domestic violence?
+    </p>
+</div>
+
+<div class="box">
+    <h3>Reminder: Model</h3>
+
+    <div class="equation">
+DV ~ heat + rain + region FE + year FE
+    </div>
+
+</div>
+
+</div>
+
+</section>
+
+<hr>
+
+<!-- explaining empowerment -->
+
+<section class="section" id="coding">
+
+<h2>About the Empowerment Score</h2>
+
+<div class="box">
+
+    <p>
+        I coded empowerment as a levelled composite score.
+    </p>
+
+    <div class="equation">
+overall empowerment =
+mean(
+    autonomy,
+    education,
+    information access,
+    economic empowerment
+)
+    </div>
+
+    <p>
+        All these variables were weighted equally,
+        but autonomy, education, etc. were themselves composite scores.
+        I did this so that the domain that was simply measured with more questions
+        wouldn't determine the result, but to have them all have equal impact.
+
+        Some variables were measured on different scales (e.g. years of education).
+        I transformed those into percentages of the max value in the data.
+    </p>
+
+</div>
+
+<div class="grid">
+
+<div class="box">
+
+    <h3>Education</h3>
+
+    <ul>
+        <li>female literacy in % per region</li>
+        <li>Mean years of education</li>
+    </ul>
+
+</div>
+
+<div class="box">
+
+    <h3>Information Access</h3>
+
+    <ul>
+        <li>"Women using the internet at least one a week (%)"</li>
+        <li>Women watching the news at least one a week (%)</li>
+        <li>Women listening to the radio at least one a week (%)</li>
+    </ul>
+
+</div>
+
+<div class="box">
+
+    <h3>Economic Empowerment</h3>
+
+    <ul>
+      <li>"Women currently married or in union who were paid cash for their work, who decide alone how their money earned is spent (%)"</li>
+      <li>"Women currently married or in union who were paid cash for their work, earning more or equal than her partner (%)"</li>
+      <li>"Women who women who worked in the past 12 months who are paid in their work (%)"</li>
+      <li>"Women owning a house alone or jointly (%)"</li>
+      <li>"Women owning land alone or jointly (%)"</li>
+    </ul>
+
+</div>
+
+<div class="box">
+
+    <h3>Autonomy</h3>
+
+    <ul>
+        <li>'DP_decide_health_p'</li>
+        <li>'DP_decide_large_purchase_p'</li>
+        <li>'DP_decide_visits_p'</li>
+        <li>'DP_decide_contraception_p'</li>
+        <li>'DP_decide_no_contraception_p'</li>
+    </ul>
+
+</div>
+
+</div>
+
+<div class="box" style="margin-top:20px;">
+
+    <h3>Coding Notes</h3>
+
+    <p>
+        As mentioned, I weighted the domains the same.
+    </p>
+
+    <p>
+        I think that's theoretically debatable and could be revised
+        in the future.
+    </p>
+
+</div>
+
+</section>
+
+<hr>
+
+<!-- MODERATOR SLIDER -->
+
+<h2>Moderation Analyses</h2>
+
+<div class="moderator-wrapper">
+
+<div class="moderator-track" id="moderatorTrack">
+
+<!-- EMPOWERMENT -->
+
+<div class="moderator-slide">
+
+<section class="section" id="empowerment">
+
+<h2>Moderator: Empowerment</h2>
+
+<div class="box">
+
+    <p>
+        Hypothesis:
+        empowerment buffers the effect of extreme heat
+        on domestic violence.
+    </p>
+
+    <div class="equation">
+dv ~ heat * empowerment + rain + region FE + year FE
+    </div>
+
+</div>
+
+<div class="box slideshow" id="slides1">
+
+<div class="slide active">
+
+    <h3>Assumption Check 1: Within-region Variance</h3>
+
+    <p>
+        Mean within-region SD:
+        <b>3.7639</b>
+    </p>
+
+    <p>
+        Moderators with little within-region variation are difficult to identify
+        in fixed-effects models because the model relies on within-region change over time.
+
+        This is in percent! So just 3%!!
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 2: Correlation with Heat</h3>
+
+    <p>
+        Correlation with heat:
+        <b>r = -0.1500</b>
+    </p>
+
+    <p>
+        Looks good
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 3: Multicollinearity</h3>
+
+    <p>
+        Moderator VIF:
+        <b>1.0230</b>
+    </p>
+
+    <p>
+        VIF looks good, too.
+    </p>
+
+</div>
+
+<div class="controls">
+    <button onclick="moveSlide('slides1',-1)">←</button>
+    <button onclick="moveSlide('slides1',1)">→</button>
+</div>
+
+</div>
+
+<div class="grid" style="margin-top:20px;">
+
+<div class="box">
+
+    <h3>Results</h3>
+
+    <p>
+        β = 0.1237<br>
+        SE = 0.2463<br>
+        p = 0.6155
+    </p>
+
+</div>
+
+<div class="box">
+
+    <h3>Interpretation</h3>
+
+    <p>
+        The effect was not big and not statistically significant... :(
+    </p>
+
+    <p>
+        This suggests the estimated heat effect appears relatively stable
+        across observed levels of empowerment.
+    </p>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<!-- COOLING -->
+
+<div class="moderator-slide">
+
+<section class="section" id="cooling">
+
+<h2>Moderator: Cooling Access</h2>
+
+<div class="box">
+
+    <p>
+        Hypothesis:
+        access to electricity and cooling infrastructure
+        buffers heat-related stress effects.
+    </p>
+
+    <div class="equation">
+dv ~ heat * electricity + rain + region FE + year FE
+    </div>
+
+</div>
+
+<div class="box slideshow" id="slides2">
+
+<div class="slide active">
+
+    <h3>Assumption Check 1: Within-region Variance</h3>
+
+    <p>
+        Mean within-region SD:
+        <b>8.9884</b>
+    </p>
+
+    <p>
+       Again, this is just percent... 8%. Small.
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 2: Correlation with Heat</h3>
+
+    <p>
+        Correlation with heat:
+        <b>r = -0.0836</b>
+    </p>
+
+    <p>
+        Looks good
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 3: Multicollinearity</h3>
+
+    <p>
+        Moderator VIF:
+        <b>1.0072</b>
+    </p>
+
+    <p>
+        Looks good
+    </p>
+
+</div>
+
+<div class="controls">
+    <button onclick="moveSlide('slides2',-1)">←</button>
+    <button onclick="moveSlide('slides2',1)">→</button>
+</div>
+
+</div>
+
+<div class="grid" style="margin-top:20px;">
+
+<div class="box">
+
+    <h3>Results</h3>
+
+    <p>
+        β = 0.0061<br>
+        SE = 0.0864<br>
+        p = 0.9441
+    </p>
+
+</div>
+
+<div class="box">
+
+    <h3>Interpretation</h3>
+
+    <p>
+        No statistically significant moderation effect, and tiny beta.
+    </p>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<!-- AGE GAP MEAN -->
+
+<div class="moderator-slide">
+
+<section class="section" id="agegapmean">
+
+<h2>Moderator: Mean Age Gap</h2>
+
+<div class="box">
+
+    <p>
+        Hypothesis:
+        larger age gaps could increase vulnerability
+        and therefore intensify the heat effect.
+    </p>
+
+    <div class="equation">
+dv ~ heat * age_gap_mean + rain + region FE + year FE
+    </div>
+
+</div>
+
+<div class="box slideshow" id="slides3">
+
+<div class="slide active">
+
+    <h3>Assumption Check 1: Within-region Variance</h3>
+
+    <p>
+        Mean within-region SD:
+        <b>0.3114</b>
+    </p>
+
+    <p>
+        This is VERY low.
+        Basically almost no within-region variation.
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 2: Correlation with Heat</h3>
+
+    <p>
+        Correlation with heat:
+        <b>r = 0.2467</b>
+    </p>
+
+    <p>
+        Not alarming, but definitely higher than the others.
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 3: Multicollinearity</h3>
+
+    <p>
+        Moderator VIF:
+        <b>1.0863</b>
+    </p>
+
+    <p>
+        Still looks fine.
+    </p>
+
+</div>
+
+<div class="controls">
+    <button onclick="moveSlide('slides3',-1)">←</button>
+    <button onclick="moveSlide('slides3',1)">→</button>
+</div>
+
+</div>
+
+<div class="grid" style="margin-top:20px;">
+
+<div class="box">
+
+    <h3>Results</h3>
+
+    <p>
+        β = -1.0032<br>
+        SE = 2.0936<br>
+        p = 0.6318
+    </p>
+
+</div>
+
+<div class="box">
+
+    <h3>Interpretation</h3>
+
+    <p>
+        No significant moderation effect.
+    </p>
+
+    <p>
+        Again basically no within-region variation,
+        hard to estimate.
+    </p>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<!-- WEALTH -->
+
+<div class="moderator-slide">
+
+<section class="section" id="wealth">
+
+<h2>Moderator: Wealth</h2>
+
+<div class="box">
+
+    <p>
+        Hypothesis:
+        wealthier regions may have more resources
+        to buffer heat-related stress.
+    </p>
+
+    <div class="equation">
+dv ~ heat * wealth + rain + region FE + year FE
+    </div>
+
+</div>
+
+<div class="box slideshow" id="slides6">
+
+<div class="slide active">
+
+    <h3>Assumption Check 1: Within-region Variance</h3>
+
+    <p>
+        Mean within-region SD:
+        <b>5.5998</b>
+    </p>
+
+    <p>
+        Better than empowerment.
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 2: Correlation with Heat</h3>
+
+    <p>
+        Correlation with heat:
+        <b>r = -0.0158</b>
+    </p>
+
+    <p>
+        Basically zero.
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 3: Multicollinearity</h3>
+
+    <p>
+        Moderator VIF:
+        <b>1.0003</b>
+    </p>
+
+    <p>
+        Extremely clean.
+    </p>
+
+</div>
+
+<div class="controls">
+    <button onclick="moveSlide('slides6',-1)">←</button>
+    <button onclick="moveSlide('slides6',1)">→</button>
+</div>
+
+</div>
+
+<div class="grid" style="margin-top:20px;">
+
+<div class="box">
+
+    <h3>Results</h3>
+
+    <p>
+        β = 0.0597<br>
+        SE = 0.1365<br>
+        p = 0.6618
+    </p>
+
+</div>
+
+<div class="box">
+
+    <h3>Interpretation</h3>
+
+    <p>
+        Tiny and non-significant.
+    </p>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+<!-- URBANICITY -->
+
+<div class="moderator-slide">
+
+<section class="section" id="urbanicity">
+
+<h2>Moderator: Urbanicity</h2>
+
+<div class="box">
+
+    <p>
+        Hypothesis:
+        urban heat island effects may intensify heat exposure.
+    </p>
+
+    <div class="equation">
+dv ~ heat * urbanicity + rain + region FE + year FE
+    </div>
+
+</div>
+
+<div class="box slideshow" id="slides7">
+
+<div class="slide active">
+
+    <h3>Assumption Check 1: Within-region Variance</h3>
+
+    <p>
+        Mean within-region SD:
+        <b>4.6417</b>
+    </p>
+
+    <p>
+        Not huge, but workable.
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 2: Correlation with Heat</h3>
+
+    <p>
+        Correlation with heat:
+        <b>r = -0.0632</b>
+    </p>
+
+    <p>
+        Looks good.
+    </p>
+
+</div>
+
+<div class="slide">
+
+    <h3>Assumption Check 3: Multicollinearity</h3>
+
+    <p>
+        Moderator VIF:
+        <b>1.0171</b>
+    </p>
+
+    <p>
+        No issue.
+    </p>
+
+</div>
+
+<div class="controls">
+    <button onclick="moveSlide('slides7',-1)">←</button>
+    <button onclick="moveSlide('slides7',1)">→</button>
+</div>
+
+</div>
+
+<div class="grid" style="margin-top:20px;">
+
+<div class="box">
+
+    <h3>Results</h3>
+
+    <p>
+        β = 0.0238<br>
+        SE = 0.1329<br>
+        p = 0.8581
+    </p>
+
+</div>
+
+<div class="box">
+
+    <h3>Interpretation</h3>
+
+    <p>
+        Again almost no moderation effect.
+    </p>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="slider-controls">
+    <button onclick="moveModerator(-1)">← Previous Moderator</button>
+    <button onclick="moveModerator(1)">Next Moderator →</button>
+</div>
+
+<hr>
+
+<!-- nice visualzzz -->
+
+<section class="section">
+
+<h2>Coefficient Plot</h2>
+
+<div class="box">
+
+    <img src="phase2_plots/plot1_coefplot.png" style="width:100%;">
+
+    <p>
+        Comparison of the effects of different moderators.
+    </p>
+
+</div>
+
+</section>
+
+<script>
+
+function moveSlide(id, direction){
+
+    let container = document.getElementById(id);
+
+    let slides = container.querySelectorAll(".slide");
+
+    let current = 0;
+
+    slides.forEach((slide, index)=>{
+        if(slide.classList.contains("active")){
+            current = index;
+        }
+    });
+
+    slides[current].classList.remove("active");
+
+    let next = (current + direction + slides.length) % slides.length;
+
+    slides[next].classList.add("active");
+}
+
+/* moderator slider */
+
+let currentModerator = 0;
+
+const track = document.getElementById("moderatorTrack");
+
+const totalModerators =
+document.querySelectorAll(".moderator-slide").length;
+
+function moveModerator(direction){
+
+    currentModerator += direction;
+
+    if(currentModerator < 0){
+        currentModerator = totalModerators - 1;
+    }
+
+    if(currentModerator >= totalModerators){
+        currentModerator = 0;
+    }
+
+    track.style.transform =
+        `translateX(-${currentModerator * 100}%)`;
+}
+
+</script>
+
+</body>
+</html>
