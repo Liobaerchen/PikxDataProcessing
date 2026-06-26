@@ -569,7 +569,7 @@ ax.axvline(x=0, color="black", linewidth=1.2, linestyle="--", alpha=0.5, label="
 ax.set_yticks(range(len(moderator_labels)))
 ax.set_yticklabels(moderator_labels, fontsize=10)
 ax.set_xlabel("Interaction coefficient β  (heat × moderator)  with 95% CI", fontsize=10)
-ax.set_title("Moderation results: heat × moderator interaction\n(all CIs cross zero → nothing significant)", fontsize=11)
+ax.set_title("Moderation results: heat × moderator interaction", fontsize=11)
 ax.legend(fontsize=9)
 
 plt.tight_layout()
