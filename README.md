@@ -26,7 +26,7 @@ prediction.
 # docs (AND PROCESS BOOK!)
 This is a website where I visualised and documented all my steps.
 To understand this project, I would highly recommend opening it!
-I also host it at: https://liobaerchen.github.io/PikxDataProcessing/index.html
+I also host it at: https://lioba-roggendorf.github.io/PikxDataProcessing/index.html
 It also contains my !!!process book!!!
 
 # literature
